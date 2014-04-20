@@ -2,7 +2,7 @@ package Blueprints.Interfaces;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 
-public interface Users {
+public interface User {
 
 	// Setting all the attributes
 	@Property("userid")
@@ -92,10 +92,10 @@ public interface Users {
 
 	// Creating Edges
 	@Adjacency(label = "friend")
-	public Iterable<Users> getFriends();
+	public Iterable<User> getFriends();
 
 	@Adjacency(label = "friend")
-	public void addFriend(Users user);
+	public void addFriend(User user);
 
 	@Adjacency(label = "owns")
 	public Iterable<Resource> getResources();
