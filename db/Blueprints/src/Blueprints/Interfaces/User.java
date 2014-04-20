@@ -1,4 +1,5 @@
 package Blueprints.Interfaces;
+import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 
@@ -96,6 +97,12 @@ public interface User {
 
 	@Adjacency(label = "friend")
 	public void addFriend(User user);
+	
+	@Adjacency(label = "friendRequest")
+	public Iterable<User> getFriendRequests();
+
+	@Adjacency(label = "friendRequest", direction=Direction.OUT)
+	public void addFriendRequests(User user);
 
 	@Adjacency(label = "owns")
 	public Iterable<Resource> getResources();
