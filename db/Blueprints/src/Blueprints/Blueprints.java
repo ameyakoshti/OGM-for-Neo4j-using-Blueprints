@@ -13,12 +13,12 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.tooling.GlobalGraphOperations;
 
+import Blueprints.Interfaces.Resource;
 import Blueprints.Interfaces.User;
 
 import com.tinkerpop.blueprints.Graph;
@@ -32,45 +32,21 @@ import edu.usc.bg.base.ObjectByteIterator;
 
 public class Blueprints extends DB {
 
-	private static final String DB_PATH = "db/Blueprints/target/neo4j-db";
+	private static final String DB_PROPERTY_PATH = "Blueprints/graph.properties";
 
 	// START SNIPPET: vars
 	static Graph graphDB;
 	FramedGraphFactory factory;
 	FramedGraph<Graph> manager;
 
-	Relationship relationship;
-	IndexManager index;
-	Index<Node> userIndex;
-
-	Node user;
-	Node resource;
-	Node pendingRequests;
-	Node fanPage;
-	Node person;
-	Node posts;
-	Node comments;
-	Node photos;
-
 	// END SNIPPET: vars
-
-	// START SNIPPET: createReltype
-	private static enum RelTypes implements RelationshipType {
-		FRIEND, FOLLOWS, OWNS, ISA, SEND, GET, REPLYOF, HASTTAG, LOCATED, MAKES, TO
-	}
-
-	private static enum NodeTypes implements Label {
-		USER, RESOURCE, MANIPULATION
-	}
-
-	// END SNIPPET: createReltype
 
 	// START SNIPPET: implement abstract functions
 	@Override
 	public boolean init() {
 		if (graphDB == null) {
 			try {
-				graphDB = GraphFactory.open("Blueprints/graph.properties");
+				graphDB = GraphFactory.open(DB_PROPERTY_PATH);
 				factory = new FramedGraphFactory();
 				manager = factory.create(graphDB);
 				//registerShutdownHook(graphDB);
@@ -94,7 +70,7 @@ public class Blueprints extends DB {
 			// for users
 			try {
 				manager.addVertex(entityPK);
-				User user = (User) manager.frame(graphDB.getVertex(1), User.class);
+				User user = (User) manager.frame(graphDB.getVertex(entityPK), User.class);
 				user.setUserID(entityPK);
 
 				for (Map.Entry<String, ByteIterator> entry : values.entrySet()) {
@@ -134,27 +110,29 @@ public class Blueprints extends DB {
 			// for resources
 			try {
 				manager.addVertex(entityPK);
-				User user = (User) manager.frame(graphDB.getVertex(1), User.class);
-				user.setUserID(entityPK);
-				
+				Resource resource = (Resource) manager.frame(graphDB.getVertex(entityPK), Resource.class);
+				resource.setRid(entityPK);
+
 				String creatorID = "1";
-				resource = ((GraphDatabaseService) graphDB).createNode();
-				resource.addLabel(NodeTypes.RESOURCE);
-				resource.setProperty("rid", entityPK);
 
 				for (Map.Entry<String, ByteIterator> entry : values.entrySet()) {
-					if (entry.getKey().toString() == "creatorid")
+					if (entry.getKey().equalsIgnoreCase("creatorid")) {
 						creatorID = entry.getValue().toString();
-					resource.setProperty(entry.getKey().toString(), entry.getValue().toString());
+						resource.setCreatorId(entry.getValue().toString());
+					}
+					if (entry.getKey().equalsIgnoreCase("walluserid"))
+						resource.setWallUserId(entry.getValue().toString());
+					if (entry.getKey().equalsIgnoreCase("type"))
+						resource.setType(entry.getValue().toString());
+					if (entry.getKey().equalsIgnoreCase("body"))
+						resource.setBody(entry.getValue().toString());
+					if (entry.getKey().equalsIgnoreCase("doc"))
+						resource.setDoc(entry.getValue().toString());
 				}
 
 				// connect the resource to the user who created it
-				userIndex = index.forNodes("user");
-
-				IndexHits<Node> hits = userIndex.get("userid", Integer.parseInt(creatorID));
-				Node createdUser = hits.getSingle();
-
-				relationship = createdUser.createRelationshipTo(resource, RelTypes.OWNS);
+				User user = (User) manager.frame(graphDB.getVertex(creatorID), User.class);
+				user.addResource(resource);
 
 			} catch (Exception e) {
 				System.out.println("insertEntity Resources : " + e.toString());
@@ -174,7 +152,7 @@ public class Blueprints extends DB {
 
 		double frndCount = 0, pendCount = 0, resCount = 0;
 
-		try (Transaction tx = graphDB.beginTx()) {
+		try {
 
 			index = graphDB.index();
 			userIndex = index.forNodes("user");
@@ -215,7 +193,6 @@ public class Blueprints extends DB {
 				result.put(props, new ObjectByteIterator(profileOwner.getProperty(props).toString().getBytes()));
 			}
 
-			tx.success();
 		} catch (Exception e) {
 			System.out.println("viewProfile : " + e.toString());
 			retVal = -1;
@@ -230,7 +207,7 @@ public class Blueprints extends DB {
 		if (requesterID < 0 || profileOwnerID < 0)
 			return -1;
 
-		try (Transaction tx = graphDB.beginTx()) {
+		try {
 
 			index = graphDB.index();
 			userIndex = index.forNodes("user");
@@ -268,7 +245,6 @@ public class Blueprints extends DB {
 				}
 			}
 
-			tx.success();
 		} catch (Exception e) {
 			System.out.println("acceptFriend : " + e.toString());
 			retVal = -1;
@@ -284,7 +260,7 @@ public class Blueprints extends DB {
 		if (profileOwnerID < 0)
 			return -1;
 
-		try (Transaction tx = graphDB.beginTx()) {
+		try {
 
 			index = graphDB.index();
 			userIndex = index.forNodes("user");
@@ -312,7 +288,6 @@ public class Blueprints extends DB {
 				}
 			}
 
-			tx.success();
 		} catch (Exception e) {
 			System.out.println("viewFriendReq : " + e.toString());
 			retVal = -1;
@@ -327,7 +302,7 @@ public class Blueprints extends DB {
 		if (inviterID < 0 || inviteeID < 0)
 			return -1;
 
-		try (Transaction tx = graphDB.beginTx()) {
+		try {
 			// System.out.println("In acceptFriend");
 
 			index = graphDB.index();
@@ -359,7 +334,6 @@ public class Blueprints extends DB {
 				}
 			}
 
-			tx.success();
 		} catch (Exception e) {
 			System.out.println("acceptFriend : " + e.toString());
 			retVal = -1;
@@ -373,7 +347,7 @@ public class Blueprints extends DB {
 		if (inviterID < 0 || inviteeID < 0)
 			return -1;
 
-		try (Transaction tx = graphDB.beginTx()) {
+		try {
 
 			index = graphDB.index();
 			userIndex = index.forNodes("user");
@@ -399,7 +373,6 @@ public class Blueprints extends DB {
 				}
 			}
 
-			tx.success();
 		} catch (Exception e) {
 			System.out.println("rejectFriend : " + e.toString());
 			retVal = -1;
@@ -413,7 +386,7 @@ public class Blueprints extends DB {
 		if (inviterID < 0 || inviteeID < 0)
 			return -1;
 
-		try (Transaction tx = graphDB.beginTx()) {
+		try {
 			// System.out.println("In inviteFriend");
 
 			index = graphDB.index();
@@ -430,7 +403,7 @@ public class Blueprints extends DB {
 				relationship = inviter.createRelationshipTo(invitee, RelTypes.FRIEND);
 				relationship.setProperty("status", "pending");
 			}
-			tx.success();
+
 		} catch (Exception e) {
 			System.out.println("inviteFriend : " + e.toString());
 			retVal = -1;
@@ -448,7 +421,7 @@ public class Blueprints extends DB {
 
 		int resCount = 0;
 
-		try (Transaction tx = graphDB.beginTx()) {
+		try {
 
 			index = graphDB.index();
 			userIndex = index.forNodes("user");
@@ -469,7 +442,6 @@ public class Blueprints extends DB {
 				result.add(values);
 			}
 
-			tx.success();
 		} catch (Exception e) {
 			System.out.println("viewTopKResources : " + e.toString());
 			retVal = -1;
@@ -482,7 +454,7 @@ public class Blueprints extends DB {
 	public int getCreatedResources(int creatorID, Vector<HashMap<String, ByteIterator>> result) {
 		int retVal = 0;
 
-		try (Transaction tx = graphDB.beginTx()) {
+		try {
 			index = graphDB.index();
 			userIndex = index.forNodes("user");
 
@@ -503,7 +475,6 @@ public class Blueprints extends DB {
 				result.add(resourceHashMap);
 			}
 
-			tx.success();
 		} catch (Exception e) {
 			System.out.println("acceptFriend : " + e.toString());
 			retVal = -1;
@@ -517,7 +488,7 @@ public class Blueprints extends DB {
 		if (profileOwnerID < 0 || requesterID < 0 || resourceID < 0)
 			return -1;
 
-		try (Transaction tx = graphDB.beginTx()) {
+		try {
 			index = graphDB.index();
 			userIndex = index.forNodes("user");
 
@@ -545,7 +516,6 @@ public class Blueprints extends DB {
 				}
 			}
 
-			tx.success();
 		} catch (Exception ex) {
 			System.out.println("viewCommentOnResource :" + ex.getMessage());
 			return -1;
@@ -555,7 +525,7 @@ public class Blueprints extends DB {
 
 	@Override
 	public int postCommentOnResource(int commentCreatorID, int resourceCreatorID, int resourceID, HashMap<String, ByteIterator> values) {
-		try (Transaction tx = graphDB.beginTx()) {
+		try {
 			index = graphDB.index();
 			userIndex = index.forNodes("user");
 
@@ -585,7 +555,6 @@ public class Blueprints extends DB {
 				}
 			}
 
-			tx.success();
 		} catch (Exception ex) {
 			System.out.println("postCommentOnResource :" + ex.getMessage());
 			return -1;
@@ -599,7 +568,7 @@ public class Blueprints extends DB {
 		if (resourceCreatorID < 0 || manipulationID < 0 || resourceID < 0)
 			return -1;
 
-		try (Transaction tx = graphDB.beginTx()) {
+		try {
 
 			// System.out.println("finding manipulation node...");
 			for (Node node : GlobalGraphOperations.at(graphDB).getAllNodesWithLabel(NodeTypes.MANIPULATION)) {
@@ -614,7 +583,6 @@ public class Blueprints extends DB {
 				}
 			}
 
-			tx.success();
 		} catch (Exception ex) {
 			System.out.println("delCommentOnResource :" + ex.getMessage());
 			return -1;
@@ -628,7 +596,7 @@ public class Blueprints extends DB {
 		if (friendid1 < 0 || friendid2 < 0)
 			return -1;
 
-		try (Transaction tx = graphDB.beginTx()) {
+		try {
 			index = graphDB.index();
 			userIndex = index.forNodes("user");
 
@@ -653,7 +621,6 @@ public class Blueprints extends DB {
 				}
 			}
 
-			tx.success();
 		} catch (Exception e) {
 			System.out.println("thawFriendship : " + e.toString());
 			retVal = -1;
@@ -668,7 +635,7 @@ public class Blueprints extends DB {
 		double usercnt = 0, frndCount = 0, pendCount = 0, resCount = 0;
 		double totalFriendsForAll = 0, totalFriendsPendingForAll = 0;
 
-		try (Transaction tx = graphDB.beginTx()) {
+		try {
 			// index = graphDB.index();
 			// userIndex = index.forNodes("user");
 
@@ -709,7 +676,7 @@ public class Blueprints extends DB {
 			frndCount = totalFriendsForAll / usercnt;
 			pendCount = totalFriendsPendingForAll / usercnt;
 			resCount = resCount / usercnt;
-			tx.success();
+
 		} catch (Exception e) {
 			System.out.println("getInitialStats : " + e.toString());
 		}
@@ -738,7 +705,7 @@ public class Blueprints extends DB {
 	public int queryPendingFriendshipIds(int memberID, Vector<Integer> pendingIds) {
 		int retVal = 0;
 
-		try (Transaction tx = graphDB.beginTx()) {
+		try {
 
 			index = graphDB.index();
 			userIndex = index.forNodes("user");
@@ -754,7 +721,6 @@ public class Blueprints extends DB {
 				}
 			}
 
-			tx.success();
 		} catch (Exception e) {
 			System.out.println("acceptFriend : " + e.toString());
 			retVal = -1;
@@ -766,7 +732,7 @@ public class Blueprints extends DB {
 	public int queryConfirmedFriendshipIds(int memberID, Vector<Integer> confirmedIds) {
 		int retVal = 0;
 
-		try (Transaction tx = graphDB.beginTx()) {
+		try {
 
 			index = graphDB.index();
 			userIndex = index.forNodes("user");
@@ -782,7 +748,6 @@ public class Blueprints extends DB {
 				}
 			}
 
-			tx.success();
 		} catch (Exception e) {
 			System.out.println("acceptFriend : " + e.toString());
 			retVal = -1;
