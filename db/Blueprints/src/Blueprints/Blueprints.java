@@ -19,6 +19,8 @@ import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.tooling.GlobalGraphOperations;
 
+import Blueprints.Interfaces.User;
+
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.GraphFactory;
 import com.tinkerpop.frames.FramedGraph;
@@ -66,12 +68,12 @@ public class Blueprints extends DB {
 	// START SNIPPET: implement abstract functions
 	@Override
 	public boolean init() {
-		if (graphDb == null) {
+		if (graphDB == null) {
 			try {
 				graphDB = GraphFactory.open("Blueprints/graph.properties");
 				factory = new FramedGraphFactory();
 				manager = factory.create(graphDB);
-				registerShutdownHook(graphDb);
+				//registerShutdownHook(graphDB);
 			} catch (Exception e) {
 				System.out.println(e);
 			}
@@ -90,38 +92,53 @@ public class Blueprints extends DB {
 
 		if (entitySet.equalsIgnoreCase("users")) {
 			// for users
-			try () {
-				//index = graphDb.index();
-				//userIndex = index.forNodes("user");
+			try {
+				manager.addVertex(entityPK);
+				User user = (User) manager.frame(graphDB.getVertex(1), User.class);
+				user.setUserID(entityPK);
 
-				//user = graphDb.createNode();
-				//user.addLabel(NodeTypes.USER);
-				//user.setProperty("userid", entityPK);
-				
-				manager.addVertex(entityPK);			
-				User user = (Person) manager.frame(graph.getVertex(1), User.class);
-				user.setName("");
-				
 				for (Map.Entry<String, ByteIterator> entry : values.entrySet()) {
-					if (insertImage && (entry.getKey().equalsIgnoreCase("pic") || entry.getKey().equalsIgnoreCase("tpic"))) {
-						user.setProperty(entry.getKey().toString(), entry.getValue().toArray());
-					} else {
-						user.setProperty(entry.getKey().toString(), entry.getValue().toString());
-					}
+					if (entry.getKey().equalsIgnoreCase("username"))
+						user.setUsername(entry.getValue().toArray().toString());
+					if (entry.getKey().equalsIgnoreCase("pw"))
+						user.setPw(entry.getValue().toArray().toString());
+					if (entry.getKey().equalsIgnoreCase("fname"))
+						user.setFName(entry.getValue().toArray().toString());
+					if (entry.getKey().equalsIgnoreCase("lname"))
+						user.setLName(entry.getValue().toArray().toString());
+					if (entry.getKey().equalsIgnoreCase("gender"))
+						user.setGender(entry.getValue().toArray().toString());
+					if (entry.getKey().equalsIgnoreCase("dob"))
+						user.setDOB(entry.getValue().toArray().toString());
+					if (entry.getKey().equalsIgnoreCase("jdate"))
+						user.setJDate(entry.getValue().toArray().toString());
+					if (entry.getKey().equalsIgnoreCase("ldate"))
+						user.setLDate(entry.getValue().toArray().toString());
+					if (entry.getKey().equalsIgnoreCase("address"))
+						user.setAddress(entry.getValue().toArray().toString());
+					if (entry.getKey().equalsIgnoreCase("email"))
+						user.setEmail(entry.getValue().toArray().toString());
+					if (entry.getKey().equalsIgnoreCase("tel"))
+						user.setTel(entry.getValue().toArray().toString());
+					if (insertImage && entry.getKey().equalsIgnoreCase("tpic"))
+						user.setTpic(entry.getValue().toArray().toString());
+					if (insertImage && entry.getKey().equalsIgnoreCase("pic"))
+						user.setPic(entry.getValue().toString());
 				}
-				userIndex.add(user, "userid", user.getProperty("userid"));
 
-				tx.success();
 			} catch (Exception e) {
 				System.out.println("insertEntity Users : " + e.toString());
 				return -1;
 			}
 		} else if (entitySet.equalsIgnoreCase("resources")) {
 			// for resources
-			// System.out.println("rid : " + entityPK);
-			try (Transaction tx = graphDb.beginTx()) {
+			try {
+				manager.addVertex(entityPK);
+				User user = (User) manager.frame(graphDB.getVertex(1), User.class);
+				user.setUserID(entityPK);
+				
 				String creatorID = "1";
-				resource = graphDb.createNode();
+				resource = ((GraphDatabaseService) graphDB).createNode();
 				resource.addLabel(NodeTypes.RESOURCE);
 				resource.setProperty("rid", entityPK);
 
@@ -132,7 +149,6 @@ public class Blueprints extends DB {
 				}
 
 				// connect the resource to the user who created it
-				index = graphDb.index();
 				userIndex = index.forNodes("user");
 
 				IndexHits<Node> hits = userIndex.get("userid", Integer.parseInt(creatorID));
@@ -140,7 +156,6 @@ public class Blueprints extends DB {
 
 				relationship = createdUser.createRelationshipTo(resource, RelTypes.OWNS);
 
-				tx.success();
 			} catch (Exception e) {
 				System.out.println("insertEntity Resources : " + e.toString());
 				return -1;
@@ -159,9 +174,9 @@ public class Blueprints extends DB {
 
 		double frndCount = 0, pendCount = 0, resCount = 0;
 
-		try (Transaction tx = graphDb.beginTx()) {
+		try (Transaction tx = graphDB.beginTx()) {
 
-			index = graphDb.index();
+			index = graphDB.index();
 			userIndex = index.forNodes("user");
 
 			IndexHits<Node> profileOwnerIndex = userIndex.get("userid", profileOwnerID);
@@ -215,9 +230,9 @@ public class Blueprints extends DB {
 		if (requesterID < 0 || profileOwnerID < 0)
 			return -1;
 
-		try (Transaction tx = graphDb.beginTx()) {
+		try (Transaction tx = graphDB.beginTx()) {
 
-			index = graphDb.index();
+			index = graphDB.index();
 			userIndex = index.forNodes("user");
 
 			IndexHits<Node> profileOwnerIndex = userIndex.get("userid", profileOwnerID);
@@ -269,9 +284,9 @@ public class Blueprints extends DB {
 		if (profileOwnerID < 0)
 			return -1;
 
-		try (Transaction tx = graphDb.beginTx()) {
+		try (Transaction tx = graphDB.beginTx()) {
 
-			index = graphDb.index();
+			index = graphDB.index();
 			userIndex = index.forNodes("user");
 
 			IndexHits<Node> profileOwnerIndex = userIndex.get("userid", profileOwnerID);
@@ -312,10 +327,10 @@ public class Blueprints extends DB {
 		if (inviterID < 0 || inviteeID < 0)
 			return -1;
 
-		try (Transaction tx = graphDb.beginTx()) {
+		try (Transaction tx = graphDB.beginTx()) {
 			// System.out.println("In acceptFriend");
 
-			index = graphDb.index();
+			index = graphDB.index();
 			userIndex = index.forNodes("user");
 
 			IndexHits<Node> hitInviter = userIndex.get("userid", inviterID);
@@ -358,9 +373,9 @@ public class Blueprints extends DB {
 		if (inviterID < 0 || inviteeID < 0)
 			return -1;
 
-		try (Transaction tx = graphDb.beginTx()) {
+		try (Transaction tx = graphDB.beginTx()) {
 
-			index = graphDb.index();
+			index = graphDB.index();
 			userIndex = index.forNodes("user");
 
 			IndexHits<Node> hitInviter = userIndex.get("userid", inviterID);
@@ -398,10 +413,10 @@ public class Blueprints extends DB {
 		if (inviterID < 0 || inviteeID < 0)
 			return -1;
 
-		try (Transaction tx = graphDb.beginTx()) {
+		try (Transaction tx = graphDB.beginTx()) {
 			// System.out.println("In inviteFriend");
 
-			index = graphDb.index();
+			index = graphDB.index();
 			userIndex = index.forNodes("user");
 
 			IndexHits<Node> hitInviter = userIndex.get("userid", inviterID);
@@ -433,9 +448,9 @@ public class Blueprints extends DB {
 
 		int resCount = 0;
 
-		try (Transaction tx = graphDb.beginTx()) {
+		try (Transaction tx = graphDB.beginTx()) {
 
-			index = graphDb.index();
+			index = graphDB.index();
 			userIndex = index.forNodes("user");
 
 			IndexHits<Node> profileOwnerIndex = userIndex.get("userid", profileOwnerID);
@@ -467,8 +482,8 @@ public class Blueprints extends DB {
 	public int getCreatedResources(int creatorID, Vector<HashMap<String, ByteIterator>> result) {
 		int retVal = 0;
 
-		try (Transaction tx = graphDb.beginTx()) {
-			index = graphDb.index();
+		try (Transaction tx = graphDB.beginTx()) {
+			index = graphDB.index();
 			userIndex = index.forNodes("user");
 
 			IndexHits<Node> hitInviter = userIndex.get("userid", creatorID);
@@ -502,8 +517,8 @@ public class Blueprints extends DB {
 		if (profileOwnerID < 0 || requesterID < 0 || resourceID < 0)
 			return -1;
 
-		try (Transaction tx = graphDb.beginTx()) {
-			index = graphDb.index();
+		try (Transaction tx = graphDB.beginTx()) {
+			index = graphDB.index();
 			userIndex = index.forNodes("user");
 
 			IndexHits<Node> hits = userIndex.get("userid", profileOwnerID);
@@ -540,8 +555,8 @@ public class Blueprints extends DB {
 
 	@Override
 	public int postCommentOnResource(int commentCreatorID, int resourceCreatorID, int resourceID, HashMap<String, ByteIterator> values) {
-		try (Transaction tx = graphDb.beginTx()) {
-			index = graphDb.index();
+		try (Transaction tx = graphDB.beginTx()) {
+			index = graphDB.index();
 			userIndex = index.forNodes("user");
 
 			IndexHits<Node> hits = userIndex.get("userid", commentCreatorID);
@@ -555,7 +570,7 @@ public class Blueprints extends DB {
 					// create a manipulation node and later connect it to the
 					// resource
 					// System.out.println("creating manipulation node...");
-					Node manipulation = graphDb.createNode();
+					Node manipulation = graphDB.createNode();
 					manipulation.addLabel(NodeTypes.MANIPULATION);
 					for (Map.Entry<String, ByteIterator> entry : values.entrySet()) {
 						manipulation.setProperty(entry.getKey().toString(), entry.getValue().toString());
@@ -584,10 +599,10 @@ public class Blueprints extends DB {
 		if (resourceCreatorID < 0 || manipulationID < 0 || resourceID < 0)
 			return -1;
 
-		try (Transaction tx = graphDb.beginTx()) {
+		try (Transaction tx = graphDB.beginTx()) {
 
 			// System.out.println("finding manipulation node...");
-			for (Node node : GlobalGraphOperations.at(graphDb).getAllNodesWithLabel(NodeTypes.MANIPULATION)) {
+			for (Node node : GlobalGraphOperations.at(graphDB).getAllNodesWithLabel(NodeTypes.MANIPULATION)) {
 				// System.out.println("deleting manipulation node...");
 				if (Integer.parseInt(node.getProperty("mid").toString()) == manipulationID) {
 					// System.out.println("deleting node relationships...");
@@ -613,8 +628,8 @@ public class Blueprints extends DB {
 		if (friendid1 < 0 || friendid2 < 0)
 			return -1;
 
-		try (Transaction tx = graphDb.beginTx()) {
-			index = graphDb.index();
+		try (Transaction tx = graphDB.beginTx()) {
+			index = graphDB.index();
 			userIndex = index.forNodes("user");
 
 			IndexHits<Node> hitInviter = userIndex.get("userid", friendid1);
@@ -653,13 +668,13 @@ public class Blueprints extends DB {
 		double usercnt = 0, frndCount = 0, pendCount = 0, resCount = 0;
 		double totalFriendsForAll = 0, totalFriendsPendingForAll = 0;
 
-		try (Transaction tx = graphDb.beginTx()) {
-			// index = graphDb.index();
+		try (Transaction tx = graphDB.beginTx()) {
+			// index = graphDB.index();
 			// userIndex = index.forNodes("user");
 
 			// CYPHER has a slower execution
 			/*
-			 * ExecutionEngine engine = new ExecutionEngine(graphDb); String
+			 * ExecutionEngine engine = new ExecutionEngine(graphDB); String
 			 * query = "match (n:USER) return count(*)"; ExecutionResult result
 			 * = engine.execute(query); Iterator<Node> it =
 			 * result.columnAs("n"); while (it.hasNext()) { Node count =
@@ -668,7 +683,7 @@ public class Blueprints extends DB {
 			 */
 
 			// Total number of users
-			for (Node node : GlobalGraphOperations.at(graphDb).getAllNodesWithLabel(NodeTypes.USER)) {
+			for (Node node : GlobalGraphOperations.at(graphDB).getAllNodesWithLabel(NodeTypes.USER)) {
 				usercnt++;
 
 				// total friends and pending requests of a user
@@ -723,9 +738,9 @@ public class Blueprints extends DB {
 	public int queryPendingFriendshipIds(int memberID, Vector<Integer> pendingIds) {
 		int retVal = 0;
 
-		try (Transaction tx = graphDb.beginTx()) {
+		try (Transaction tx = graphDB.beginTx()) {
 
-			index = graphDb.index();
+			index = graphDB.index();
 			userIndex = index.forNodes("user");
 
 			IndexHits<Node> hitInviter = userIndex.get("userid", memberID);
@@ -751,9 +766,9 @@ public class Blueprints extends DB {
 	public int queryConfirmedFriendshipIds(int memberID, Vector<Integer> confirmedIds) {
 		int retVal = 0;
 
-		try (Transaction tx = graphDb.beginTx()) {
+		try (Transaction tx = graphDB.beginTx()) {
 
-			index = graphDb.index();
+			index = graphDB.index();
 			userIndex = index.forNodes("user");
 
 			IndexHits<Node> hitInviter = userIndex.get("userid", memberID);
@@ -777,11 +792,11 @@ public class Blueprints extends DB {
 
 	// END SNIPPET: implement abstract functions
 
-	private static void registerShutdownHook(final GraphDatabaseService graphDb) {
+	private static void registerShutdownHook(final GraphDatabaseService graphDB) {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
-				graphDb.shutdown();
+				graphDB.shutdown();
 			}
 		});
 	}
