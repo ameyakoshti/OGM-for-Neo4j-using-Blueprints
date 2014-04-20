@@ -1,4 +1,4 @@
-package Neo4j;
+package Blueprints;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +36,7 @@ public class Blueprints extends DB {
 	static Graph graphDB;
 	FramedGraphFactory factory;
 	FramedGraph<Graph> manager;
-	
+
 	Relationship relationship;
 	IndexManager index;
 	Index<Node> userIndex;
@@ -91,12 +91,17 @@ public class Blueprints extends DB {
 		if (entitySet.equalsIgnoreCase("users")) {
 			// for users
 			try () {
-				index = graphDb.index();
-				userIndex = index.forNodes("user");
+				//index = graphDb.index();
+				//userIndex = index.forNodes("user");
 
-				user = graphDb.createNode();
-				user.addLabel(NodeTypes.USER);
-				user.setProperty("userid", entityPK);
+				//user = graphDb.createNode();
+				//user.addLabel(NodeTypes.USER);
+				//user.setProperty("userid", entityPK);
+				
+				manager.addVertex(entityPK);			
+				User user = (Person) manager.frame(graph.getVertex(1), User.class);
+				user.setName("");
+				
 				for (Map.Entry<String, ByteIterator> entry : values.entrySet()) {
 					if (insertImage && (entry.getKey().equalsIgnoreCase("pic") || entry.getKey().equalsIgnoreCase("tpic"))) {
 						user.setProperty(entry.getKey().toString(), entry.getValue().toArray());

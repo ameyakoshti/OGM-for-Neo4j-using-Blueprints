@@ -1,3 +1,4 @@
+package Blueprints.Interfaces;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
 
