@@ -19,6 +19,11 @@ import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.tooling.GlobalGraphOperations;
 
+import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.GraphFactory;
+import com.tinkerpop.frames.FramedGraph;
+import com.tinkerpop.frames.FramedGraphFactory;
+
 import edu.usc.bg.base.ByteIterator;
 import edu.usc.bg.base.DB;
 import edu.usc.bg.base.ObjectByteIterator;
@@ -28,7 +33,10 @@ public class Blueprints extends DB {
 	private static final String DB_PATH = "db/Blueprints/target/neo4j-db";
 
 	// START SNIPPET: vars
-	static GraphDatabaseService graphDb;
+	static Graph graphDB;
+	FramedGraphFactory factory;
+	FramedGraph<Graph> manager;
+	
 	Relationship relationship;
 	IndexManager index;
 	Index<Node> userIndex;
@@ -59,8 +67,15 @@ public class Blueprints extends DB {
 	@Override
 	public boolean init() {
 		if (graphDb == null) {
-			graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
-			registerShutdownHook(graphDb);
+			try {
+				graphDB = GraphFactory.open("Blueprints/graph.properties");
+				factory = new FramedGraphFactory();
+				manager = factory.create(graphDB);
+				registerShutdownHook(graphDb);
+			} catch (Exception e) {
+				System.out.println(e);
+			}
+
 		}
 		return true;
 	}
@@ -75,8 +90,7 @@ public class Blueprints extends DB {
 
 		if (entitySet.equalsIgnoreCase("users")) {
 			// for users
-			// System.out.println("userid : " + entityPK);
-			try (Transaction tx = graphDb.beginTx()) {
+			try () {
 				index = graphDb.index();
 				userIndex = index.forNodes("user");
 
