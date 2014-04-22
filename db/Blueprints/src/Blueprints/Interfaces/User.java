@@ -104,6 +104,9 @@ public interface User {
 	@Adjacency(label = "friendRequest", direction=Direction.OUT)
 	public void addFriendRequests(User user);
 
+	@Adjacency(label = "friendRequest")
+	public void removeFriendRequests(User user);
+
 	@Adjacency(label = "owns")
 	public Iterable<Resource> getResources();
 

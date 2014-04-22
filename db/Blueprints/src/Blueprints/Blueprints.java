@@ -343,27 +343,15 @@ public class Blueprints extends DB {
 		try {
 			// System.out.println("In acceptFriend");
 
-			//index = graphDB.index();
-			//userIndex = index.forNodes("user");
-
 			User inviter = (User) manager.frame(graphDB.getVertex(inviterID), User.class);
-			//IndexHits<Node> hitInviter = userIndex.get("userid", inviterID);
-			//Node inviter = hitInviter.getSingle();
 
 			User invitee = (User) manager.frame(graphDB.getVertex(inviteeID), User.class);
-			//IndexHits<Node> hitInvitee = userIndex.get("userid", inviteeID);
-			//Node invitee = hitInvitee.getSingle();
 
 			if (inviter != null && invitee != null) {
-				for (Relationship rel : inviter.getRelationships(RelTypes.FRIEND, Direction.BOTH)) {
-					// System.out.println("gettin other dude");
-					Node inviteeFromRel = rel.getEndNode();
-
-					if (Integer.parseInt(inviteeFromRel.getProperty("userid").toString()) == inviteeID) {
-						// System.out.println("found other dude");
-						// relationship = inviter.createRelationshipTo(invitee,
-						// RelTypes.FRIEND);
-						rel.setProperty("status", "accepted");
+				for (User userReq : invitee.getFriendRequests()) {
+					if (userReq.getUserID().equals(inviter.getUserID())) {
+						invitee.removeFriendRequests(inviter);
+						invitee.addFriend(inviter);
 						break;
 					}
 				}
