@@ -200,58 +200,96 @@ public class Blueprints extends DB {
 
 		return retVal;
 	}
+	// Ankit working on listFriends
+		@Override
+		public int listFriends(int requesterID, int profileOwnerID,
+				Set<String> fields, Vector<HashMap<String, ByteIterator>> result,
+				boolean insertImage, boolean testMode) {
+			System.out.println("Running listFriends()");
+			// TODO Auto-generated method stub
+			User profileOwner = manager.getVertex(profileOwnerID, User.class);
 
-	@Override
-	public int listFriends(int requesterID, int profileOwnerID, Set<String> fields, Vector<HashMap<String, ByteIterator>> result, boolean insertImage, boolean testMode) {
-		int retVal = 0;
-		if (requesterID < 0 || profileOwnerID < 0)
-			return -1;
-
-		try {
-
-			index = graphDB.index();
-			userIndex = index.forNodes("user");
-
-			IndexHits<Node> profileOwnerIndex = userIndex.get("userid", profileOwnerID);
-			Node profileOwner = profileOwnerIndex.getSingle();
-
-			for (Relationship rel : profileOwner.getRelationships(RelTypes.FRIEND, Direction.BOTH)) {
-				if (rel.getProperty("status").toString().equalsIgnoreCase("accepted")) {
-					Node friend = rel.getEndNode();
-					HashMap<String, ByteIterator> values = new HashMap<String, ByteIterator>();
-
-					if (fields != null) {
-						for (String props : friend.getPropertyKeys()) {
-							if (fields.contains(props)) {
-								if (!insertImage && (props.toLowerCase().equalsIgnoreCase("tpic") || props.toLowerCase().equalsIgnoreCase("pic")))
-									continue;
-								else {
-									if (props.toLowerCase().equals("tpic")) {
-										values.put("pic", new ObjectByteIterator(friend.getProperty(props).toString().getBytes()));
-									} else {
-										values.put(props, new ObjectByteIterator(friend.getProperty(props).toString().getBytes()));
-									}
-								}
-							}
+			for(User friends : profileOwner.getFriends())
+			{					
+				HashMap<String, ByteIterator> hm = new HashMap<>();
+				
+				if(fields == null || fields.isEmpty())
+				{
+					hm.put("userid", new StringByteIterator(friends.getUserID()));
+					hm.put("username", new StringByteIterator(friends.getUsername()));
+					hm.put("pw", new StringByteIterator(friends.getPw()));
+					hm.put("fname", new StringByteIterator(friends.getFName()));
+					hm.put("lname", new StringByteIterator(friends.getLName()));
+					hm.put("gender", new StringByteIterator(friends.getGender()));
+					hm.put("dob", new StringByteIterator(friends.getDOB()));
+					hm.put("jdate", new StringByteIterator(friends.getJDate()));
+					hm.put("ldate", new StringByteIterator(friends.getLDate()));
+					hm.put("address", new StringByteIterator(friends.getAddress()));
+					hm.put("email", new StringByteIterator(friends.getEmail()));
+					hm.put("tel", new StringByteIterator(friends.getTel()));
+				}	
+				else
+				{
+					for(String field : fields)
+					{
+						if(field.equalsIgnoreCase("userid"))
+						{
+							hm.put("userid", new StringByteIterator(friends.getUserID()));
 						}
-					} else {
-						for (String props : friend.getPropertyKeys()) {
-							if (!insertImage && (props.toLowerCase().equalsIgnoreCase("tpic") || props.toLowerCase().equalsIgnoreCase("pic")))
-								continue;
-							values.put(props, new ObjectByteIterator(friend.getProperty(props).toString().getBytes()));
+						else if(field.equalsIgnoreCase("username"))
+						{
+							hm.put("username", new StringByteIterator(friends.getUsername()));
+						}
+						else if(field.equalsIgnoreCase("pw"))
+						{
+							hm.put("pw", new StringByteIterator(friends.getPw()));
+						}
+						else if(field.equalsIgnoreCase("fname"))
+						{
+							hm.put("fname", new StringByteIterator(friends.getFName()));
+						}
+						else if(field.equalsIgnoreCase("lname"))
+						{
+							hm.put("lname", new StringByteIterator(friends.getLName()));
+						}
+						else if(field.equalsIgnoreCase("gender"))
+						{
+							hm.put("gender", new StringByteIterator(friends.getGender()));
+						}
+						else if(field.equalsIgnoreCase("dob"))
+						{
+							hm.put("dob", new StringByteIterator(friends.getDOB()));
+						}
+						else if(field.equalsIgnoreCase("jdate"))
+						{
+							hm.put("jdate", new StringByteIterator(friends.getJDate()));
+						}
+						else if(field.equalsIgnoreCase("ldate"))
+						{
+							hm.put("ldate", new StringByteIterator(friends.getLDate()));
+						}
+						else if(field.equalsIgnoreCase("address"))
+						{
+							hm.put("address", new StringByteIterator(friends.getAddress()));
+						}
+						else if(field.equalsIgnoreCase("email"))
+						{
+							hm.put("email", new StringByteIterator(friends.getEmail()));
+						}
+						else if(field.equalsIgnoreCase("tel"))
+						{
+							hm.put("tel", new StringByteIterator(friends.getTel()));
 						}
 					}
-					result.add(values);
 				}
+				if(insertImage)
+				{
+					hm.put("pic", new StringByteIterator(friends.getTpic()));
+				}
+				result.add(hm);
 			}
-
-		} catch (Exception e) {
-			System.out.println("acceptFriend : " + e.toString());
-			retVal = -1;
 		}
 
-		return retVal;
-	}
 
 	@Override
 	public int viewFriendReq(int profileOwnerID, Vector<HashMap<String, ByteIterator>> results, boolean insertImage, boolean testMode) {
