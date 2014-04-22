@@ -50,46 +50,46 @@ public interface User {
 
 	// Getting all the attributes
 	@Property("userid")
-	public void getUserID();
+	public String getUserID();
 
 	@Property("username")
-	public void getUsername();
+	public String getUsername();
 
 	@Property("pw")
-	public void getPw();
+	public String getPw();
 
 	@Property("fname")
-	public void getFName();
+	public String getFName();
 
 	@Property("lname")
-	public void getLName();
+	public String getLName();
 
 	@Property("gender")
-	public void getGender();
+	public String getGender();
 
 	@Property("dob")
-	public void getDOB();
+	public String getDOB();
 
 	@Property("jdate")
-	public void getJDate();
+	public String getJDate();
 
 	@Property("ldate")
-	public void getLDate();
+	public String getLDate();
 
 	@Property("address")
-	public void getAddress();
+	public String getAddress();
 
 	@Property("email")
-	public void getEmail();
+	public String getEmail();
 
 	@Property("tel")
-	public void getTel();
+	public String getTel();
 
 	@Property("pic")
-	public void getPic();
+	public String getPic();
 
 	@Property("tpic")
-	public void getTpic();
+	public String getTpic();
 
 	// Creating Edges
 	@Adjacency(label = "friend")
