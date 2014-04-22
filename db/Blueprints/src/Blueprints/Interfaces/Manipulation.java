@@ -1,7 +1,5 @@
 package Blueprints.Interfaces;
 
-import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.EdgeFrame;
 import com.tinkerpop.frames.InVertex;
 import com.tinkerpop.frames.OutVertex;
