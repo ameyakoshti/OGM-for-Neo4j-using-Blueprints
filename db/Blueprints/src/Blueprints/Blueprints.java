@@ -23,6 +23,7 @@ import Blueprints.Interfaces.User;
 
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.GraphFactory;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 
@@ -200,96 +201,65 @@ public class Blueprints extends DB {
 
 		return retVal;
 	}
-	// Ankit working on listFriends
-		@Override
-		public int listFriends(int requesterID, int profileOwnerID,
-				Set<String> fields, Vector<HashMap<String, ByteIterator>> result,
-				boolean insertImage, boolean testMode) {
-			System.out.println("Running listFriends()");
-			// TODO Auto-generated method stub
-			User profileOwner = manager.getVertex(profileOwnerID, User.class);
 
-			for(User friends : profileOwner.getFriends())
-			{					
-				HashMap<String, ByteIterator> hm = new HashMap<>();
-				
-				if(fields == null || fields.isEmpty())
-				{
-					hm.put("userid", new StringByteIterator(friends.getUserID()));
-					hm.put("username", new StringByteIterator(friends.getUsername()));
-					hm.put("pw", new StringByteIterator(friends.getPw()));
-					hm.put("fname", new StringByteIterator(friends.getFName()));
-					hm.put("lname", new StringByteIterator(friends.getLName()));
-					hm.put("gender", new StringByteIterator(friends.getGender()));
-					hm.put("dob", new StringByteIterator(friends.getDOB()));
-					hm.put("jdate", new StringByteIterator(friends.getJDate()));
-					hm.put("ldate", new StringByteIterator(friends.getLDate()));
-					hm.put("address", new StringByteIterator(friends.getAddress()));
-					hm.put("email", new StringByteIterator(friends.getEmail()));
-					hm.put("tel", new StringByteIterator(friends.getTel()));
-				}	
-				else
-				{
-					for(String field : fields)
-					{
-						if(field.equalsIgnoreCase("userid"))
-						{
-							hm.put("userid", new StringByteIterator(friends.getUserID()));
-						}
-						else if(field.equalsIgnoreCase("username"))
-						{
-							hm.put("username", new StringByteIterator(friends.getUsername()));
-						}
-						else if(field.equalsIgnoreCase("pw"))
-						{
-							hm.put("pw", new StringByteIterator(friends.getPw()));
-						}
-						else if(field.equalsIgnoreCase("fname"))
-						{
-							hm.put("fname", new StringByteIterator(friends.getFName()));
-						}
-						else if(field.equalsIgnoreCase("lname"))
-						{
-							hm.put("lname", new StringByteIterator(friends.getLName()));
-						}
-						else if(field.equalsIgnoreCase("gender"))
-						{
-							hm.put("gender", new StringByteIterator(friends.getGender()));
-						}
-						else if(field.equalsIgnoreCase("dob"))
-						{
-							hm.put("dob", new StringByteIterator(friends.getDOB()));
-						}
-						else if(field.equalsIgnoreCase("jdate"))
-						{
-							hm.put("jdate", new StringByteIterator(friends.getJDate()));
-						}
-						else if(field.equalsIgnoreCase("ldate"))
-						{
-							hm.put("ldate", new StringByteIterator(friends.getLDate()));
-						}
-						else if(field.equalsIgnoreCase("address"))
-						{
-							hm.put("address", new StringByteIterator(friends.getAddress()));
-						}
-						else if(field.equalsIgnoreCase("email"))
-						{
-							hm.put("email", new StringByteIterator(friends.getEmail()));
-						}
-						else if(field.equalsIgnoreCase("tel"))
-						{
-							hm.put("tel", new StringByteIterator(friends.getTel()));
-						}
+	// Ankit working on listFriends
+	@Override
+	public int listFriends(int requesterID, int profileOwnerID, Set<String> fields, Vector<HashMap<String, ByteIterator>> result, boolean insertImage, boolean testMode) {
+		System.out.println("Running listFriends()");
+		// TODO Auto-generated method stub
+		User profileOwner = manager.getVertex(profileOwnerID, User.class);
+
+		for (User friends : profileOwner.getFriends()) {
+			HashMap<String, ByteIterator> hm = new HashMap<>();
+
+			if (fields == null || fields.isEmpty()) {
+				hm.put("userid", new StringByteIterator(friends.getUserID()));
+				hm.put("username", new StringByteIterator(friends.getUsername()));
+				hm.put("pw", new StringByteIterator(friends.getPw()));
+				hm.put("fname", new StringByteIterator(friends.getFName()));
+				hm.put("lname", new StringByteIterator(friends.getLName()));
+				hm.put("gender", new StringByteIterator(friends.getGender()));
+				hm.put("dob", new StringByteIterator(friends.getDOB()));
+				hm.put("jdate", new StringByteIterator(friends.getJDate()));
+				hm.put("ldate", new StringByteIterator(friends.getLDate()));
+				hm.put("address", new StringByteIterator(friends.getAddress()));
+				hm.put("email", new StringByteIterator(friends.getEmail()));
+				hm.put("tel", new StringByteIterator(friends.getTel()));
+			} else {
+				for (String field : fields) {
+					if (field.equalsIgnoreCase("userid")) {
+						hm.put("userid", new StringByteIterator(friends.getUserID()));
+					} else if (field.equalsIgnoreCase("username")) {
+						hm.put("username", new StringByteIterator(friends.getUsername()));
+					} else if (field.equalsIgnoreCase("pw")) {
+						hm.put("pw", new StringByteIterator(friends.getPw()));
+					} else if (field.equalsIgnoreCase("fname")) {
+						hm.put("fname", new StringByteIterator(friends.getFName()));
+					} else if (field.equalsIgnoreCase("lname")) {
+						hm.put("lname", new StringByteIterator(friends.getLName()));
+					} else if (field.equalsIgnoreCase("gender")) {
+						hm.put("gender", new StringByteIterator(friends.getGender()));
+					} else if (field.equalsIgnoreCase("dob")) {
+						hm.put("dob", new StringByteIterator(friends.getDOB()));
+					} else if (field.equalsIgnoreCase("jdate")) {
+						hm.put("jdate", new StringByteIterator(friends.getJDate()));
+					} else if (field.equalsIgnoreCase("ldate")) {
+						hm.put("ldate", new StringByteIterator(friends.getLDate()));
+					} else if (field.equalsIgnoreCase("address")) {
+						hm.put("address", new StringByteIterator(friends.getAddress()));
+					} else if (field.equalsIgnoreCase("email")) {
+						hm.put("email", new StringByteIterator(friends.getEmail()));
+					} else if (field.equalsIgnoreCase("tel")) {
+						hm.put("tel", new StringByteIterator(friends.getTel()));
 					}
 				}
-				if(insertImage)
-				{
-					hm.put("pic", new StringByteIterator(friends.getTpic()));
-				}
-				result.add(hm);
 			}
+			if (insertImage) {
+				hm.put("pic", new StringByteIterator(friends.getTpic()));
+			}
+			result.add(hm);
 		}
-
+	}
 
 	@Override
 	public int viewFriendReq(int profileOwnerID, Vector<HashMap<String, ByteIterator>> results, boolean insertImage, boolean testMode) {
@@ -412,19 +382,12 @@ public class Blueprints extends DB {
 		try {
 			// System.out.println("In inviteFriend");
 
-			index = graphDB.index();
-			userIndex = index.forNodes("user");
+			User inviter = (User) manager.frame(graphDB.getVertex(inviterID), User.class);
 
-			IndexHits<Node> hitInviter = userIndex.get("userid", inviterID);
-			Node inviter = hitInviter.getSingle();
+			User invitee = (User) manager.frame(graphDB.getVertex(inviteeID), User.class);
 
-			IndexHits<Node> hitInvitee = userIndex.get("userid", inviteeID);
-			Node invitee = hitInvitee.getSingle();
-
-			Relationship relationship;
 			if (inviter != null && invitee != null) {
-				relationship = inviter.createRelationshipTo(invitee, RelTypes.FRIEND);
-				relationship.setProperty("status", "pending");
+				inviter.addFriendRequests(invitee);
 			}
 
 		} catch (Exception e) {
@@ -478,24 +441,21 @@ public class Blueprints extends DB {
 		int retVal = 0;
 
 		try {
-			index = graphDB.index();
-			userIndex = index.forNodes("user");
 
-			IndexHits<Node> hitInviter = userIndex.get("userid", creatorID);
-			Node member = hitInviter.getSingle();
+			User member = (User) manager.frame(graphDB.getVertex(creatorID), User.class);
 
-			for (Relationship rel : member.getRelationships(RelTypes.OWNS, Direction.BOTH)) {
+			for (Resource resource : member.getResources()) {
 				HashMap<String, ByteIterator> resourceHashMap = new HashMap<String, ByteIterator>();
 
-				Node resourceNode = rel.getEndNode();
-				resourceHashMap.put("rid", (ByteIterator) resourceNode.getProperty("rid"));
-				resourceHashMap.put("creatorid", (ByteIterator) resourceNode.getProperty("creatorid"));
-				resourceHashMap.put("walluserid", (ByteIterator) resourceNode.getProperty("walluserid"));
-				resourceHashMap.put("type", (ByteIterator) resourceNode.getProperty("type"));
-				resourceHashMap.put("body", (ByteIterator) resourceNode.getProperty("body"));
-				resourceHashMap.put("doc", (ByteIterator) resourceNode.getProperty("doc"));
+				resourceHashMap.put("rid", (ByteIterator) resource.getRid());
+				resourceHashMap.put("creatorid", (ByteIterator) resource.getCreatorId());
+				resourceHashMap.put("walluserid", (ByteIterator) resource.getWallUserId());
+				resourceHashMap.put("type", (ByteIterator) resource.getType());
+				resourceHashMap.put("body", (ByteIterator) resource.getBody());
+				resourceHashMap.put("doc", (ByteIterator) resource.getDoc());
 
 				result.add(resourceHashMap);
+
 			}
 
 		} catch (Exception e) {
@@ -659,40 +619,34 @@ public class Blueprints extends DB {
 		double totalFriendsForAll = 0, totalFriendsPendingForAll = 0;
 
 		try {
-			// index = graphDB.index();
-			// userIndex = index.forNodes("user");
-
-			// CYPHER has a slower execution
-			/*
-			 * ExecutionEngine engine = new ExecutionEngine(graphDB); String
-			 * query = "match (n:USER) return count(*)"; ExecutionResult result
-			 * = engine.execute(query); Iterator<Node> it =
-			 * result.columnAs("n"); while (it.hasNext()) { Node count =
-			 * it.next(); usercnt =
-			 * Integer.parseInt(count.getProperty("USER").toString()); }
-			 */
 
 			// Total number of users
-			for (Node node : GlobalGraphOperations.at(graphDB).getAllNodesWithLabel(NodeTypes.USER)) {
-				usercnt++;
+			Iterable<Vertex> allVertices = graphDB.getVertices();
+			for (Vertex vertex : allVertices) {
+				for (String s : vertex.getPropertyKeys()) {
+					if (s.equals("userid")) {
+						usercnt++;
 
-				// total friends and pending requests of a user
-				frndCount = 0;
-				pendCount = 0;
-				for (Relationship rel : node.getRelationships(RelTypes.FRIEND, Direction.BOTH)) {
-					if (rel.getProperty("status").equals("accepted")) {
-						frndCount++;
+						User node = (User) vertex;
+						
+						// total friends and pending requests of a user
+						frndCount = 0;
+						pendCount = 0;
+						for (User friend : node.getFriendRequests()) {
+							pendCount++;
+						}
+						for (User friend : node.getFriends()) {
+							frndCount++;
+						}
+						for (Resource resource : node.getResources()) {
+							resCount++;
+						}
+						totalFriendsForAll += frndCount;
+						totalFriendsPendingForAll += frndCount;
 					}
-					if (rel.getProperty("status").equals("pending")) {
-						pendCount++;
-					}
-				}
-				totalFriendsForAll += frndCount;
-				totalFriendsPendingForAll += frndCount;
-
-				// total resources for a user
-				for (Relationship relIterate : node.getRelationships(RelTypes.OWNS, Direction.BOTH)) {
-					resCount++;
+					
+					// break is outside the if cos the first property identifies the node type : user or resource
+					break;
 				}
 			}
 
@@ -730,18 +684,10 @@ public class Blueprints extends DB {
 
 		try {
 
-			index = graphDB.index();
-			userIndex = index.forNodes("user");
+			User member = (User) manager.frame(graphDB.getVertex(memberID), User.class);
 
-			IndexHits<Node> hitInviter = userIndex.get("userid", memberID);
-			Node member = hitInviter.getSingle();
-
-			for (Relationship rel : member.getRelationships(RelTypes.FRIEND, Direction.BOTH)) {
-				if (rel.getProperty("status").toString().equalsIgnoreCase("pending")) {
-					// System.out.println("found friend");
-					Node otherDude = rel.getEndNode();
-					pendingIds.add(Integer.parseInt(otherDude.getProperty("userid").toString()));
-				}
+			for (User friend : member.getFriendRequests()) {
+				pendingIds.add(Integer.parseInt(friend.getUserID()));
 			}
 
 		} catch (Exception e) {
@@ -757,18 +703,10 @@ public class Blueprints extends DB {
 
 		try {
 
-			index = graphDB.index();
-			userIndex = index.forNodes("user");
+			User member = (User) manager.frame(graphDB.getVertex(memberID), User.class);
 
-			IndexHits<Node> hitInviter = userIndex.get("userid", memberID);
-			Node member = hitInviter.getSingle();
-
-			for (Relationship rel : member.getRelationships(RelTypes.FRIEND, Direction.BOTH)) {
-				if (rel.getProperty("status").toString().equalsIgnoreCase("accepted")) {
-					// .println("found friend");
-					Node otherDude = rel.getEndNode();
-					confirmedIds.add(Integer.parseInt(otherDude.getProperty("userid").toString()));
-				}
+			for (User friend : member.getFriends()) {
+				confirmedIds.add(Integer.parseInt(friend.getUserID()));
 			}
 
 		} catch (Exception e) {
