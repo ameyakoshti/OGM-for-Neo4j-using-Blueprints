@@ -330,31 +330,19 @@ public class Blueprints extends DB {
 			return -1;
 
 		try {
+			User inviter = (User) manager.frame(graphDB.getVertex(inviterID), User.class);
 
-			index = graphDB.index();
-			userIndex = index.forNodes("user");
-
-			IndexHits<Node> hitInviter = userIndex.get("userid", inviterID);
-			Node inviter = hitInviter.getSingle();
-
-			IndexHits<Node> hitInvitee = userIndex.get("userid", inviteeID);
-			Node invitee = hitInvitee.getSingle();
+			User invitee = (User) manager.frame(graphDB.getVertex(inviteeID), User.class);
 
 			if (inviter != null && invitee != null) {
-				for (Relationship rel : inviter.getRelationships(RelTypes.FRIEND, Direction.BOTH)) {
-
+				for (User userReq : invitee.getFriends()) {
 					// Check if the 2nd user has sent a friend request.
-					if (rel.getProperty("status").equals("pending")) {
-						Node inviteeFromRel = rel.getEndNode();
-
-						if (Integer.parseInt(inviteeFromRel.getProperty("userid").toString()) == inviteeID) {
-							rel.delete();
-							break;
-						}
+					if (userReq.getUserID().equals(inviter.getUserID())) {
+						invitee.removeFriendRequests(inviter);
+						break;
 					}
 				}
 			}
-
 		} catch (Exception e) {
 			System.out.println("rejectFriend : " + e.toString());
 			retVal = -1;
