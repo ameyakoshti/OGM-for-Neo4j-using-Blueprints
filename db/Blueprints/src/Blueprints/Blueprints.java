@@ -35,7 +35,6 @@ public class Blueprints extends DB {
 	static Graph graphDB;
 	FramedGraphFactory factory;
 	FramedGraph<Graph> manager;
-
 	// END SNIPPET: vars
 
 	// START SNIPPET: implement abstract functions
@@ -668,6 +667,5 @@ public class Blueprints extends DB {
 		}
 		return retVal;
 	}
-
 	// END SNIPPET: implement abstract functions
 }
