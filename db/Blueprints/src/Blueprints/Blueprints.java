@@ -382,26 +382,23 @@ public class Blueprints extends DB {
 		int resCount = 0;
 
 		try {
+			User profileOwner = (User) manager.frame(graphDB.getVertex(profileOwnerID), User.class);
 
-			index = graphDB.index();
-			userIndex = index.forNodes("user");
-
-			IndexHits<Node> profileOwnerIndex = userIndex.get("userid", profileOwnerID);
-			Node profileOwner = profileOwnerIndex.getSingle();
-
-			for (Relationship rel : profileOwner.getRelationships(RelTypes.OWNS, Direction.BOTH)) {
+			for (Resource resource : profileOwner.getResources()) {
 				resCount++;
 				if (resCount > k)
 					break;
-
-				Node nodeResource = rel.getEndNode();
+				
 				HashMap<String, ByteIterator> values = new HashMap<String, ByteIterator>();
-				for (String props : nodeResource.getPropertyKeys()) {
-					values.put(props, new ObjectByteIterator(nodeResource.getProperty(props).toString().getBytes()));
-				}
+				
+				values.put("creatorid", new StringByteIterator(resource.getCreatorId()));
+				values.put("walluserid", new StringByteIterator(resource.getWallUserId()));
+				values.put("type", new StringByteIterator(resource.getType()));
+				values.put("body", new StringByteIterator(resource.getBody()));
+				values.put("doc", new StringByteIterator(resource.getDoc()));
+				
 				result.add(values);
 			}
-
 		} catch (Exception e) {
 			System.out.println("viewTopKResources : " + e.toString());
 			retVal = -1;
