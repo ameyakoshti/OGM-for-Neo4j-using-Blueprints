@@ -267,33 +267,30 @@ public class Blueprints extends DB {
 			return -1;
 
 		try {
-
-			index = graphDB.index();
-			userIndex = index.forNodes("user");
-
-			IndexHits<Node> profileOwnerIndex = userIndex.get("userid", profileOwnerID);
-			Node profileOwner = profileOwnerIndex.getSingle();
-
+			User profileOwner = (User) manager.frame(graphDB.getVertex(profileOwnerID), User.class);
+			
 			// total friends and pending requests of a user
-			for (Relationship rel : profileOwner.getRelationships(RelTypes.FRIEND, Direction.INCOMING)) {
-				// System.out.println("found friend");
-				if (rel.getProperty("status").equals("pending")) {
-					// System.out.println("found pending");
-					Node pendingFriend = rel.getEndNode();
-					HashMap<String, ByteIterator> values = new HashMap<String, ByteIterator>();
-					for (String props : pendingFriend.getPropertyKeys()) {
-						if (!insertImage && (props.toLowerCase().equalsIgnoreCase("tpic") || props.toLowerCase().equalsIgnoreCase("pic")))
-							continue;
-						// System.out.println(props);
-						// System.out.println(pendingFriend.getProperty(props).toString());
-						values.put(props, new ObjectByteIterator(pendingFriend.getProperty(props).toString().getBytes()));
-					}
-					// System.out.println(values.toString());
-					results.add(values);
-					// System.out.println(results.elementAt(0).toString());
+			for (User pendingFriend : profileOwner.getFriendRequests()) {
+				HashMap<String, ByteIterator> values = new HashMap<String, ByteIterator>();
+				
+				values.put("userid", new StringByteIterator(pendingFriend.getUserID()));
+				values.put("username", new StringByteIterator(pendingFriend.getUsername()));
+				values.put("pw", new StringByteIterator(pendingFriend.getPw()));
+				values.put("fname", new StringByteIterator(pendingFriend.getFName()));
+				values.put("lname", new StringByteIterator(pendingFriend.getLName()));
+				values.put("gender", new StringByteIterator(pendingFriend.getGender()));
+				values.put("dob", new StringByteIterator(pendingFriend.getDOB()));
+				values.put("jdate", new StringByteIterator(pendingFriend.getJDate()));
+				values.put("ldate", new StringByteIterator(pendingFriend.getLDate()));
+				values.put("address", new StringByteIterator(pendingFriend.getAddress()));
+				values.put("email", new StringByteIterator(pendingFriend.getEmail()));
+				values.put("tel", new StringByteIterator(pendingFriend.getTel()));
+				if (insertImage){
+					values.put("tpic", new StringByteIterator(pendingFriend.getTpic()));
 				}
+				
+				results.add(values);
 			}
-
 		} catch (Exception e) {
 			System.out.println("viewFriendReq : " + e.toString());
 			retVal = -1;
