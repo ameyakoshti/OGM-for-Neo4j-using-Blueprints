@@ -8,14 +8,9 @@ import java.util.Vector;
 
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
-import org.neo4j.graphdb.index.IndexManager;
 import org.neo4j.tooling.GlobalGraphOperations;
 
 import Blueprints.Interfaces.Resource;
@@ -30,6 +25,7 @@ import com.tinkerpop.frames.FramedGraphFactory;
 import edu.usc.bg.base.ByteIterator;
 import edu.usc.bg.base.DB;
 import edu.usc.bg.base.ObjectByteIterator;
+import edu.usc.bg.base.StringByteIterator;
 
 public class Blueprints extends DB {
 
@@ -206,7 +202,7 @@ public class Blueprints extends DB {
 	@Override
 	public int listFriends(int requesterID, int profileOwnerID, Set<String> fields, Vector<HashMap<String, ByteIterator>> result, boolean insertImage, boolean testMode) {
 		System.out.println("Running listFriends()");
-		// TODO Auto-generated method stub
+		int retVal = 0;
 		User profileOwner = manager.getVertex(profileOwnerID, User.class);
 
 		for (User friends : profileOwner.getFriends()) {
@@ -259,6 +255,7 @@ public class Blueprints extends DB {
 			}
 			result.add(hm);
 		}
+		return retVal;
 	}
 
 	@Override
@@ -380,8 +377,6 @@ public class Blueprints extends DB {
 			return -1;
 
 		try {
-			// System.out.println("In inviteFriend");
-
 			User inviter = (User) manager.frame(graphDB.getVertex(inviterID), User.class);
 
 			User invitee = (User) manager.frame(graphDB.getVertex(inviteeID), User.class);
@@ -389,7 +384,6 @@ public class Blueprints extends DB {
 			if (inviter != null && invitee != null) {
 				inviter.addFriendRequests(invitee);
 			}
-
 		} catch (Exception e) {
 			System.out.println("inviteFriend : " + e.toString());
 			retVal = -1;
@@ -441,23 +435,20 @@ public class Blueprints extends DB {
 		int retVal = 0;
 
 		try {
-
 			User member = (User) manager.frame(graphDB.getVertex(creatorID), User.class);
 
 			for (Resource resource : member.getResources()) {
 				HashMap<String, ByteIterator> resourceHashMap = new HashMap<String, ByteIterator>();
 
-				resourceHashMap.put("rid", (ByteIterator) resource.getRid());
-				resourceHashMap.put("creatorid", (ByteIterator) resource.getCreatorId());
-				resourceHashMap.put("walluserid", (ByteIterator) resource.getWallUserId());
-				resourceHashMap.put("type", (ByteIterator) resource.getType());
-				resourceHashMap.put("body", (ByteIterator) resource.getBody());
-				resourceHashMap.put("doc", (ByteIterator) resource.getDoc());
+				resourceHashMap.put("rid", new StringByteIterator(resource.getRid()));
+				resourceHashMap.put("creatorid", new StringByteIterator(resource.getCreatorId()));
+				resourceHashMap.put("walluserid", new StringByteIterator(resource.getWallUserId()));
+				resourceHashMap.put("type", new StringByteIterator(resource.getType()));
+				resourceHashMap.put("body", new StringByteIterator(resource.getBody()));
+				resourceHashMap.put("doc", new StringByteIterator(resource.getDoc()));
 
 				result.add(resourceHashMap);
-
 			}
-
 		} catch (Exception e) {
 			System.out.println("acceptFriend : " + e.toString());
 			retVal = -1;
@@ -628,7 +619,7 @@ public class Blueprints extends DB {
 						usercnt++;
 
 						User node = (User) vertex;
-						
+
 						// total friends and pending requests of a user
 						frndCount = 0;
 						pendCount = 0;
@@ -644,7 +635,7 @@ public class Blueprints extends DB {
 						totalFriendsForAll += frndCount;
 						totalFriendsPendingForAll += frndCount;
 					}
-					
+
 					// break is outside the if cos the first property identifies the node type : user or resource
 					break;
 				}
@@ -683,13 +674,11 @@ public class Blueprints extends DB {
 		int retVal = 0;
 
 		try {
-
 			User member = (User) manager.frame(graphDB.getVertex(memberID), User.class);
 
 			for (User friend : member.getFriendRequests()) {
 				pendingIds.add(Integer.parseInt(friend.getUserID()));
 			}
-
 		} catch (Exception e) {
 			System.out.println("acceptFriend : " + e.toString());
 			retVal = -1;
@@ -702,13 +691,11 @@ public class Blueprints extends DB {
 		int retVal = 0;
 
 		try {
-
 			User member = (User) manager.frame(graphDB.getVertex(memberID), User.class);
 
 			for (User friend : member.getFriends()) {
 				confirmedIds.add(Integer.parseInt(friend.getUserID()));
 			}
-
 		} catch (Exception e) {
 			System.out.println("acceptFriend : " + e.toString());
 			retVal = -1;
@@ -717,13 +704,4 @@ public class Blueprints extends DB {
 	}
 
 	// END SNIPPET: implement abstract functions
-
-	private static void registerShutdownHook(final GraphDatabaseService graphDB) {
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			@Override
-			public void run() {
-				graphDB.shutdown();
-			}
-		});
-	}
 }
