@@ -150,26 +150,17 @@ public class Blueprints extends DB {
 		double frndCount = 0, pendCount = 0, resCount = 0;
 
 		try {
-
-			index = graphDB.index();
-			userIndex = index.forNodes("user");
-
-			IndexHits<Node> profileOwnerIndex = userIndex.get("userid", profileOwnerID);
-			Node profileOwner = profileOwnerIndex.getSingle();
+			User profileOwner = (User) manager.frame(graphDB.getVertex(profileOwnerID), User.class);
 
 			// total friends and pending requests of a user
-			for (Relationship rel : profileOwner.getRelationships(RelTypes.FRIEND, Direction.BOTH)) {
-				if (rel.getProperty("status").equals("accepted")) {
-					frndCount++;
-				}
-
-				if (rel.getProperty("status").equals("pending")) {
-					pendCount++;
-				}
+			for (User friend : profileOwner.getFriendRequests()) {
+				pendCount++;
 			}
-
+			for (User friend : profileOwner.getFriends()) {
+				frndCount++;
+			}
 			// total resources for a user
-			for (Relationship relIterate : profileOwner.getRelationships(RelTypes.OWNS, Direction.BOTH)) {
+			for (Resource resource : profileOwner.getResources()) {
 				resCount++;
 			}
 
@@ -184,12 +175,22 @@ public class Blueprints extends DB {
 			result.put("resourcecount", new ObjectByteIterator(Double.toString(resCount).getBytes()));
 
 			// put the profile details
-			for (String props : profileOwner.getPropertyKeys()) {
-				if (!insertImage && (props.toLowerCase().equalsIgnoreCase("tpic") || props.toLowerCase().equalsIgnoreCase("pic")))
-					continue;
-				result.put(props, new ObjectByteIterator(profileOwner.getProperty(props).toString().getBytes()));
+			result.put("userid", new StringByteIterator(profileOwner.getUserID()));
+			result.put("username", new StringByteIterator(profileOwner.getUsername()));
+			result.put("pw", new StringByteIterator(profileOwner.getPw()));
+			result.put("fname", new StringByteIterator(profileOwner.getFName()));
+			result.put("lname", new StringByteIterator(profileOwner.getLName()));
+			result.put("gender", new StringByteIterator(profileOwner.getGender()));
+			result.put("dob", new StringByteIterator(profileOwner.getDOB()));
+			result.put("jdate", new StringByteIterator(profileOwner.getJDate()));
+			result.put("ldate", new StringByteIterator(profileOwner.getLDate()));
+			result.put("address", new StringByteIterator(profileOwner.getAddress()));
+			result.put("email", new StringByteIterator(profileOwner.getEmail()));
+			result.put("tel", new StringByteIterator(profileOwner.getTel()));
+			if (insertImage){
+				result.put("tpic", new StringByteIterator(profileOwner.getTpic()));
+				result.put("pic", new StringByteIterator(profileOwner.getPic()));
 			}
-
 		} catch (Exception e) {
 			System.out.println("viewProfile : " + e.toString());
 			retVal = -1;
@@ -308,8 +309,6 @@ public class Blueprints extends DB {
 			return -1;
 
 		try {
-			// System.out.println("In acceptFriend");
-
 			User inviter = (User) manager.frame(graphDB.getVertex(inviterID), User.class);
 
 			User invitee = (User) manager.frame(graphDB.getVertex(inviteeID), User.class);
@@ -323,7 +322,6 @@ public class Blueprints extends DB {
 					}
 				}
 			}
-
 		} catch (Exception e) {
 			System.out.println("acceptFriend : " + e.toString());
 			retVal = -1;
