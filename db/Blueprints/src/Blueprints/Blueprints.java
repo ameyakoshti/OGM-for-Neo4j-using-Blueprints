@@ -166,9 +166,7 @@ public class Blueprints extends DB {
 
 			result.put("friendcount", new ObjectByteIterator(Double.toString(frndCount).getBytes()));
 			// Pending friend request count.
-			// If owner viewing her own profile, she can view her pending
-			// friend
-			// requests.
+			// If owner viewing her own profile, she can view her pending friend requests.
 			if (requesterID == profileOwnerID) {
 				result.put("pendingcount", new ObjectByteIterator(Double.toString(pendCount).getBytes()));
 			}
@@ -187,7 +185,7 @@ public class Blueprints extends DB {
 			result.put("address", new StringByteIterator(profileOwner.getAddress()));
 			result.put("email", new StringByteIterator(profileOwner.getEmail()));
 			result.put("tel", new StringByteIterator(profileOwner.getTel()));
-			if (insertImage){
+			if (insertImage) {
 				result.put("tpic", new StringByteIterator(profileOwner.getTpic()));
 				result.put("pic", new StringByteIterator(profileOwner.getPic()));
 			}
@@ -199,7 +197,6 @@ public class Blueprints extends DB {
 		return retVal;
 	}
 
-	// Ankit working on listFriends
 	@Override
 	public int listFriends(int requesterID, int profileOwnerID, Set<String> fields, Vector<HashMap<String, ByteIterator>> result, boolean insertImage, boolean testMode) {
 		System.out.println("Running listFriends()");
@@ -268,11 +265,11 @@ public class Blueprints extends DB {
 
 		try {
 			User profileOwner = (User) manager.frame(graphDB.getVertex(profileOwnerID), User.class);
-			
+
 			// total friends and pending requests of a user
 			for (User pendingFriend : profileOwner.getFriendRequests()) {
 				HashMap<String, ByteIterator> values = new HashMap<String, ByteIterator>();
-				
+
 				values.put("userid", new StringByteIterator(pendingFriend.getUserID()));
 				values.put("username", new StringByteIterator(pendingFriend.getUsername()));
 				values.put("pw", new StringByteIterator(pendingFriend.getPw()));
@@ -285,10 +282,10 @@ public class Blueprints extends DB {
 				values.put("address", new StringByteIterator(pendingFriend.getAddress()));
 				values.put("email", new StringByteIterator(pendingFriend.getEmail()));
 				values.put("tel", new StringByteIterator(pendingFriend.getTel()));
-				if (insertImage){
+				if (insertImage) {
 					values.put("tpic", new StringByteIterator(pendingFriend.getTpic()));
 				}
-				
+
 				results.add(values);
 			}
 		} catch (Exception e) {
@@ -566,30 +563,19 @@ public class Blueprints extends DB {
 			return -1;
 
 		try {
-			index = graphDB.index();
-			userIndex = index.forNodes("user");
+			User inviter = (User) manager.frame(graphDB.getVertex(friendid1), User.class);
 
-			IndexHits<Node> hitInviter = userIndex.get("userid", friendid1);
-			Node inviter = hitInviter.getSingle();
-
-			IndexHits<Node> hitInvitee = userIndex.get("userid", friendid2);
-			Node invitee = hitInvitee.getSingle();
+			User invitee = (User) manager.frame(graphDB.getVertex(friendid2), User.class);
 
 			if (inviter != null && invitee != null) {
-				for (Relationship rel : inviter.getRelationships(RelTypes.FRIEND, Direction.BOTH)) {
-
+				for (User userReq : invitee.getFriends()) {
 					// Check if the 2nd user is a friend.
-					if (rel.getProperty("status").equals("accepted")) {
-						Node inviteeFromRel = rel.getEndNode();
-
-						if (Integer.parseInt(inviteeFromRel.getProperty("userid").toString()) == friendid2) {
-							rel.delete();
-							break;
-						}
+					if (userReq.getUserID().equals(inviter.getUserID())) {
+						invitee.removeFriend(inviter);
+						break;
 					}
 				}
 			}
-
 		} catch (Exception e) {
 			System.out.println("thawFriendship : " + e.toString());
 			retVal = -1;

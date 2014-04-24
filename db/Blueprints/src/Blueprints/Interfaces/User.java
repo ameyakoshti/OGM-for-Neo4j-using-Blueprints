@@ -98,6 +98,9 @@ public interface User {
 	@Adjacency(label = "friend")
 	public void addFriend(User user);
 	
+	@Adjacency(label = "friend")
+	public void removeFriend(User user);
+	
 	@Adjacency(label = "friendRequest")
 	public Iterable<User> getFriendRequests();
 
