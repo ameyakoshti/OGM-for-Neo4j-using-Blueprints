@@ -1,7 +1,11 @@
 package Blueprints.Interfaces;
+
+import CreatedInfo;
+
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
+import com.tinkerpop.frames.Incidence;
 
 public interface User {
 
@@ -91,20 +95,20 @@ public interface User {
 	@Property("tpic")
 	public String getTpic();
 
-	// Creating Edges
+	// Setting adjacency
 	@Adjacency(label = "friend")
 	public Iterable<User> getFriends();
 
 	@Adjacency(label = "friend")
 	public void addFriend(User user);
-	
+
 	@Adjacency(label = "friend")
 	public void removeFriend(User user);
-	
+
 	@Adjacency(label = "friendRequest")
 	public Iterable<User> getFriendRequests();
 
-	@Adjacency(label = "friendRequest", direction=Direction.OUT)
+	@Adjacency(label = "friendRequest", direction = Direction.OUT)
 	public void addFriendRequests(User user);
 
 	@Adjacency(label = "friendRequest")
@@ -115,4 +119,9 @@ public interface User {
 
 	@Adjacency(label = "owns")
 	public void addResource(Resource resource);
+
+	// Setting incidences
+	@Incidence(label = "manipulation", direction = Direction.OUT)
+	public Iterable<Manipulation> getAllManipulations();
+
 }
