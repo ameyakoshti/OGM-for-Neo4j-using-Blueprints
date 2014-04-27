@@ -539,38 +539,42 @@ public class Blueprints extends DB {
 			int resourceCreatorID, int resourceID,
 			HashMap<String, ByteIterator> values) {
 		try {
-			index = graphDB.index();
-			userIndex = index.forNodes("user");
+			User commentCreator = (User) manager.frame(
+					graphDB.getVertex(commentCreatorID), User.class);
+			User resourceCreator = (User) manager.frame(
+					graphDB.getVertex(resourceCreatorID), User.class);
+			Resource resource = (Resource) manager.frame(
+					graphDB.getVertex(resourceID), Resource.class);
 
-			IndexHits<Node> hits = userIndex.get("userid", commentCreatorID);
-			Node createdUser = hits.getSingle();
+			Manipulation m = resource.addManipulations(commentCreator);
 
-			// System.out.println("finding resource node...");
-			for (Relationship relIterate : createdUser.getRelationships(
-					RelTypes.OWNS, Direction.OUTGOING)) {
-				Node resource = relIterate.getEndNode();
-
-				if (Integer.parseInt(resource.getProperty("rid").toString()) == resourceID) {
-					// create a manipulation node and later connect it to the
-					// resource
-					// System.out.println("creating manipulation node...");
-					Node manipulation = graphDB.createNode();
-					manipulation.addLabel(NodeTypes.MANIPULATION);
-					for (Map.Entry<String, ByteIterator> entry : values
-							.entrySet()) {
-						manipulation.setProperty(entry.getKey().toString(),
-								entry.getValue().toString());
-					}
-					// System.out.println("adding relationships...");
-					// add a relationship from user to manipulation and from
-					// manipulation to the resource
-					relationship = createdUser.createRelationshipTo(
-							manipulation, RelTypes.MAKES);
-					relationship = manipulation.createRelationshipTo(resource,
-							RelTypes.TO);
-
-					break;
+			for (Map.Entry<String, ByteIterator> entry : values.entrySet()) 
+			{
+				if (entry.getKey().equalsIgnoreCase("content")) 
+				{
+					m.setContent(entry.getValue().toString());
 				}
+				if(entry.getKey().equalsIgnoreCase("creatorid"))
+				{
+					m.setCreatorId(entry.getValue().toString());
+				}
+				if(entry.getKey().equalsIgnoreCase("mid"))
+				{
+					m.seMid(entry.getValue().toString());
+				}
+				if(entry.getKey().equalsIgnoreCase("modifierid"))
+				{
+					m.setModifierId(entry.getValue().toString());
+				}
+				if(entry.getKey().equalsIgnoreCase("timestamp"))
+				{
+					m.setTimestamp(entry.getValue().toString());
+				}
+				if(entry.getKey().equalsIgnoreCase("type"))
+				{
+					m.setType(entry.getValue().toString());
+				}
+
 			}
 
 		} catch (Exception ex) {
