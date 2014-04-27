@@ -12,8 +12,8 @@ public interface Manipulation extends EdgeFrame {
 	@Property("creatorid")
 	public void setCreatorId(String creatorid);
 
-	@Property("rid")
-	public void setRid(String rid);
+//	@Property("rid")
+//	public void setRid(String rid);
 
 	@Property("modifierid")
 	public void setModifierId(String modifierid);
@@ -27,8 +27,8 @@ public interface Manipulation extends EdgeFrame {
 	@Property("content")
 	public void setContent(String content);
 
-	@Property("rid")
-	public String getRid();
+//	@Property("rid")
+//	public String getRid();
 
 	@Property("creatorid")
 	public String getCreatorId();
