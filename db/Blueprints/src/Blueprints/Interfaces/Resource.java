@@ -1,7 +1,10 @@
 package Blueprints.Interfaces;
 
+import CreatedInfo;
+
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
+import com.tinkerpop.frames.Incidence;
 import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.VertexFrame;
 
@@ -44,4 +47,7 @@ public interface Resource extends VertexFrame {
 
 	@Adjacency(label = "created", direction = Direction.IN)
 	public Iterable<Resource> getCreatedByUser();
+
+	@Incidence(label = "manipulations")
+	public Iterable<Manipulation> getManipulations();
 }
