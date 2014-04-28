@@ -539,39 +539,35 @@ public class Blueprints extends DB {
 			int resourceCreatorID, int resourceID,
 			HashMap<String, ByteIterator> values) {
 		try {
+
 			User commentCreator = (User) manager.frame(
 					graphDB.getVertex(commentCreatorID), User.class);
 			User resourceCreator = (User) manager.frame(
 					graphDB.getVertex(resourceCreatorID), User.class);
 			Resource resource = (Resource) manager.frame(
 					graphDB.getVertex(resourceID), Resource.class);
+			Manipulation m = manager.addEgde(values.get("mid").toString(),
+					resource, commentCreator, "manipulation");
 
-			Manipulation m = resource.addManipulations(commentCreator);
+			// Manipulation m = resource.addManipulations(commentCreator);
 
-			for (Map.Entry<String, ByteIterator> entry : values.entrySet()) 
-			{
-				if (entry.getKey().equalsIgnoreCase("content")) 
-				{
+			for (Map.Entry<String, ByteIterator> entry : values.entrySet()) {
+				if (entry.getKey().equalsIgnoreCase("content")) {
 					m.setContent(entry.getValue().toString());
 				}
-				if(entry.getKey().equalsIgnoreCase("creatorid"))
-				{
+				if (entry.getKey().equalsIgnoreCase("creatorid")) {
 					m.setCreatorId(entry.getValue().toString());
 				}
-				if(entry.getKey().equalsIgnoreCase("mid"))
-				{
+				if (entry.getKey().equalsIgnoreCase("mid")) {
 					m.seMid(entry.getValue().toString());
 				}
-				if(entry.getKey().equalsIgnoreCase("modifierid"))
-				{
+				if (entry.getKey().equalsIgnoreCase("modifierid")) {
 					m.setModifierId(entry.getValue().toString());
 				}
-				if(entry.getKey().equalsIgnoreCase("timestamp"))
-				{
+				if (entry.getKey().equalsIgnoreCase("timestamp")) {
 					m.setTimestamp(entry.getValue().toString());
 				}
-				if(entry.getKey().equalsIgnoreCase("type"))
-				{
+				if (entry.getKey().equalsIgnoreCase("type")) {
 					m.setType(entry.getValue().toString());
 				}
 
@@ -591,22 +587,15 @@ public class Blueprints extends DB {
 		if (resourceCreatorID < 0 || manipulationID < 0 || resourceID < 0)
 			return -1;
 
+		Manipulation m = (Manipulation) manager.frame(graphDB.getEdge(manipulationID),
+				Manipulation.class);
+
+		Resource resource = (Resource) manager.frame(
+				graphDB.getVertex(resourceID), Resource.class);
+
 		try {
 
-			// System.out.println("finding manipulation node...");
-			for (Node node : GlobalGraphOperations.at(graphDB)
-					.getAllNodesWithLabel(NodeTypes.MANIPULATION)) {
-				// System.out.println("deleting manipulation node...");
-				if (Integer.parseInt(node.getProperty("mid").toString()) == manipulationID) {
-					// System.out.println("deleting node relationships...");
-					for (Relationship relIterate : node
-							.getRelationships(Direction.BOTH)) {
-						relIterate.delete();
-					}
-					node.delete();
-					break;
-				}
-			}
+			resource.removeManipulations(m);
 
 		} catch (Exception ex) {
 			System.out.println("delCommentOnResource :" + ex.getMessage());
