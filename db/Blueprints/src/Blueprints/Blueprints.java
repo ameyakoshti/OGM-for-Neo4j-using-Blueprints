@@ -51,8 +51,7 @@ public class Blueprints extends DB {
 	}
 
 	@Override
-	public int insertEntity(String entitySet, String entityPK,
-			HashMap<String, ByteIterator> values, boolean insertImage) {
+	public int insertEntity(String entitySet, String entityPK, HashMap<String, ByteIterator> values, boolean insertImage) {
 		if (entitySet == null) {
 			return -1;
 		}
@@ -63,8 +62,7 @@ public class Blueprints extends DB {
 			// for users
 			try {
 				manager.addVertex(entityPK);
-				User user = (User) manager.frame(graphDB.getVertex(entityPK),
-						User.class);
+				User user = (User) manager.frame(graphDB.getVertex(entityPK), User.class);
 				user.setUserID(entityPK);
 
 				for (Map.Entry<String, ByteIterator> entry : values.entrySet()) {
@@ -104,8 +102,7 @@ public class Blueprints extends DB {
 			// for resources
 			try {
 				manager.addVertex(entityPK);
-				Resource resource = (Resource) manager.frame(
-						graphDB.getVertex(entityPK), Resource.class);
+				Resource resource = (Resource) manager.frame(graphDB.getVertex(entityPK), Resource.class);
 				resource.setRid(entityPK);
 
 				String creatorID = "1";
@@ -126,8 +123,7 @@ public class Blueprints extends DB {
 				}
 
 				// connect the resource to the user who created it
-				User user = (User) manager.frame(graphDB.getVertex(creatorID),
-						User.class);
+				User user = (User) manager.frame(graphDB.getVertex(creatorID), User.class);
 				user.addResource(resource);
 
 			} catch (Exception e) {
@@ -140,9 +136,7 @@ public class Blueprints extends DB {
 	}
 
 	@Override
-	public int viewProfile(int requesterID, int profileOwnerID,
-			HashMap<String, ByteIterator> result, boolean insertImage,
-			boolean testMode) {
+	public int viewProfile(int requesterID, int profileOwnerID, HashMap<String, ByteIterator> result, boolean insertImage, boolean testMode) {
 		int retVal = 0;
 
 		if (requesterID < 0 || profileOwnerID < 0)
@@ -151,8 +145,7 @@ public class Blueprints extends DB {
 		double frndCount = 0, pendCount = 0, resCount = 0;
 
 		try {
-			User profileOwner = (User) manager.frame(
-					graphDB.getVertex(profileOwnerID), User.class);
+			User profileOwner = (User) manager.frame(graphDB.getVertex(profileOwnerID), User.class);
 
 			// total friends and pending requests of a user
 			for (User friend : profileOwner.getFriendRequests()) {
@@ -166,40 +159,30 @@ public class Blueprints extends DB {
 				resCount++;
 			}
 
-			result.put("friendcount",
-					new ObjectByteIterator(Double.toString(frndCount)
-							.getBytes()));
+			result.put("friendcount", new ObjectByteIterator(Double.toString(frndCount).getBytes()));
 			// Pending friend request count.
 			// If owner viewing her own profile, she can view her pending friend
 			// requests.
 			if (requesterID == profileOwnerID) {
-				result.put("pendingcount", new ObjectByteIterator(Double
-						.toString(pendCount).getBytes()));
+				result.put("pendingcount", new ObjectByteIterator(Double.toString(pendCount).getBytes()));
 			}
-			result.put(
-					"resourcecount",
-					new ObjectByteIterator(Double.toString(resCount).getBytes()));
+			result.put("resourcecount", new ObjectByteIterator(Double.toString(resCount).getBytes()));
 
 			// put the profile details
-			result.put("userid",
-					new StringByteIterator(profileOwner.getUserID()));
-			result.put("username",
-					new StringByteIterator(profileOwner.getUsername()));
+			result.put("userid", new StringByteIterator(profileOwner.getUserID()));
+			result.put("username", new StringByteIterator(profileOwner.getUsername()));
 			result.put("pw", new StringByteIterator(profileOwner.getPw()));
 			result.put("fname", new StringByteIterator(profileOwner.getFName()));
 			result.put("lname", new StringByteIterator(profileOwner.getLName()));
-			result.put("gender",
-					new StringByteIterator(profileOwner.getGender()));
+			result.put("gender", new StringByteIterator(profileOwner.getGender()));
 			result.put("dob", new StringByteIterator(profileOwner.getDOB()));
 			result.put("jdate", new StringByteIterator(profileOwner.getJDate()));
 			result.put("ldate", new StringByteIterator(profileOwner.getLDate()));
-			result.put("address",
-					new StringByteIterator(profileOwner.getAddress()));
+			result.put("address", new StringByteIterator(profileOwner.getAddress()));
 			result.put("email", new StringByteIterator(profileOwner.getEmail()));
 			result.put("tel", new StringByteIterator(profileOwner.getTel()));
 			if (insertImage) {
-				result.put("tpic",
-						new StringByteIterator(profileOwner.getTpic()));
+				result.put("tpic", new StringByteIterator(profileOwner.getTpic()));
 				result.put("pic", new StringByteIterator(profileOwner.getPic()));
 			}
 		} catch (Exception e) {
@@ -211,9 +194,7 @@ public class Blueprints extends DB {
 	}
 
 	@Override
-	public int listFriends(int requesterID, int profileOwnerID,
-			Set<String> fields, Vector<HashMap<String, ByteIterator>> result,
-			boolean insertImage, boolean testMode) {
+	public int listFriends(int requesterID, int profileOwnerID, Set<String> fields, Vector<HashMap<String, ByteIterator>> result, boolean insertImage, boolean testMode) {
 		System.out.println("Running listFriends()");
 		int retVal = 0;
 		User profileOwner = manager.getVertex(profileOwnerID, User.class);
@@ -223,8 +204,7 @@ public class Blueprints extends DB {
 
 			if (fields == null || fields.isEmpty()) {
 				hm.put("userid", new StringByteIterator(friends.getUserID()));
-				hm.put("username",
-						new StringByteIterator(friends.getUsername()));
+				hm.put("username", new StringByteIterator(friends.getUsername()));
 				hm.put("pw", new StringByteIterator(friends.getPw()));
 				hm.put("fname", new StringByteIterator(friends.getFName()));
 				hm.put("lname", new StringByteIterator(friends.getLName()));
@@ -238,36 +218,27 @@ public class Blueprints extends DB {
 			} else {
 				for (String field : fields) {
 					if (field.equalsIgnoreCase("userid")) {
-						hm.put("userid",
-								new StringByteIterator(friends.getUserID()));
+						hm.put("userid", new StringByteIterator(friends.getUserID()));
 					} else if (field.equalsIgnoreCase("username")) {
-						hm.put("username",
-								new StringByteIterator(friends.getUsername()));
+						hm.put("username", new StringByteIterator(friends.getUsername()));
 					} else if (field.equalsIgnoreCase("pw")) {
 						hm.put("pw", new StringByteIterator(friends.getPw()));
 					} else if (field.equalsIgnoreCase("fname")) {
-						hm.put("fname",
-								new StringByteIterator(friends.getFName()));
+						hm.put("fname", new StringByteIterator(friends.getFName()));
 					} else if (field.equalsIgnoreCase("lname")) {
-						hm.put("lname",
-								new StringByteIterator(friends.getLName()));
+						hm.put("lname", new StringByteIterator(friends.getLName()));
 					} else if (field.equalsIgnoreCase("gender")) {
-						hm.put("gender",
-								new StringByteIterator(friends.getGender()));
+						hm.put("gender", new StringByteIterator(friends.getGender()));
 					} else if (field.equalsIgnoreCase("dob")) {
 						hm.put("dob", new StringByteIterator(friends.getDOB()));
 					} else if (field.equalsIgnoreCase("jdate")) {
-						hm.put("jdate",
-								new StringByteIterator(friends.getJDate()));
+						hm.put("jdate", new StringByteIterator(friends.getJDate()));
 					} else if (field.equalsIgnoreCase("ldate")) {
-						hm.put("ldate",
-								new StringByteIterator(friends.getLDate()));
+						hm.put("ldate", new StringByteIterator(friends.getLDate()));
 					} else if (field.equalsIgnoreCase("address")) {
-						hm.put("address",
-								new StringByteIterator(friends.getAddress()));
+						hm.put("address", new StringByteIterator(friends.getAddress()));
 					} else if (field.equalsIgnoreCase("email")) {
-						hm.put("email",
-								new StringByteIterator(friends.getEmail()));
+						hm.put("email", new StringByteIterator(friends.getEmail()));
 					} else if (field.equalsIgnoreCase("tel")) {
 						hm.put("tel", new StringByteIterator(friends.getTel()));
 					}
@@ -282,48 +253,33 @@ public class Blueprints extends DB {
 	}
 
 	@Override
-	public int viewFriendReq(int profileOwnerID,
-			Vector<HashMap<String, ByteIterator>> results, boolean insertImage,
-			boolean testMode) {
+	public int viewFriendReq(int profileOwnerID, Vector<HashMap<String, ByteIterator>> results, boolean insertImage, boolean testMode) {
 		int retVal = 0;
 
 		if (profileOwnerID < 0)
 			return -1;
 
 		try {
-			User profileOwner = (User) manager.frame(
-					graphDB.getVertex(profileOwnerID), User.class);
+			User profileOwner = (User) manager.frame(graphDB.getVertex(profileOwnerID), User.class);
 
 			// total friends and pending requests of a user
 			for (User pendingFriend : profileOwner.getFriendRequests()) {
 				HashMap<String, ByteIterator> values = new HashMap<String, ByteIterator>();
 
-				values.put("userid",
-						new StringByteIterator(pendingFriend.getUserID()));
-				values.put("username",
-						new StringByteIterator(pendingFriend.getUsername()));
+				values.put("userid", new StringByteIterator(pendingFriend.getUserID()));
+				values.put("username", new StringByteIterator(pendingFriend.getUsername()));
 				values.put("pw", new StringByteIterator(pendingFriend.getPw()));
-				values.put("fname",
-						new StringByteIterator(pendingFriend.getFName()));
-				values.put("lname",
-						new StringByteIterator(pendingFriend.getLName()));
-				values.put("gender",
-						new StringByteIterator(pendingFriend.getGender()));
-				values.put("dob",
-						new StringByteIterator(pendingFriend.getDOB()));
-				values.put("jdate",
-						new StringByteIterator(pendingFriend.getJDate()));
-				values.put("ldate",
-						new StringByteIterator(pendingFriend.getLDate()));
-				values.put("address",
-						new StringByteIterator(pendingFriend.getAddress()));
-				values.put("email",
-						new StringByteIterator(pendingFriend.getEmail()));
-				values.put("tel",
-						new StringByteIterator(pendingFriend.getTel()));
+				values.put("fname", new StringByteIterator(pendingFriend.getFName()));
+				values.put("lname", new StringByteIterator(pendingFriend.getLName()));
+				values.put("gender", new StringByteIterator(pendingFriend.getGender()));
+				values.put("dob", new StringByteIterator(pendingFriend.getDOB()));
+				values.put("jdate", new StringByteIterator(pendingFriend.getJDate()));
+				values.put("ldate", new StringByteIterator(pendingFriend.getLDate()));
+				values.put("address", new StringByteIterator(pendingFriend.getAddress()));
+				values.put("email", new StringByteIterator(pendingFriend.getEmail()));
+				values.put("tel", new StringByteIterator(pendingFriend.getTel()));
 				if (insertImage) {
-					values.put("tpic",
-							new StringByteIterator(pendingFriend.getTpic()));
+					values.put("tpic", new StringByteIterator(pendingFriend.getTpic()));
 				}
 
 				results.add(values);
@@ -343,11 +299,9 @@ public class Blueprints extends DB {
 			return -1;
 
 		try {
-			User inviter = (User) manager.frame(graphDB.getVertex(inviterID),
-					User.class);
+			User inviter = (User) manager.frame(graphDB.getVertex(inviterID), User.class);
 
-			User invitee = (User) manager.frame(graphDB.getVertex(inviteeID),
-					User.class);
+			User invitee = (User) manager.frame(graphDB.getVertex(inviteeID), User.class);
 
 			if (inviter != null && invitee != null) {
 				for (User userReq : invitee.getFriendRequests()) {
@@ -372,11 +326,9 @@ public class Blueprints extends DB {
 			return -1;
 
 		try {
-			User inviter = (User) manager.frame(graphDB.getVertex(inviterID),
-					User.class);
+			User inviter = (User) manager.frame(graphDB.getVertex(inviterID), User.class);
 
-			User invitee = (User) manager.frame(graphDB.getVertex(inviteeID),
-					User.class);
+			User invitee = (User) manager.frame(graphDB.getVertex(inviteeID), User.class);
 
 			if (inviter != null && invitee != null) {
 				for (User userReq : invitee.getFriends()) {
@@ -401,11 +353,9 @@ public class Blueprints extends DB {
 			return -1;
 
 		try {
-			User inviter = (User) manager.frame(graphDB.getVertex(inviterID),
-					User.class);
+			User inviter = (User) manager.frame(graphDB.getVertex(inviterID), User.class);
 
-			User invitee = (User) manager.frame(graphDB.getVertex(inviteeID),
-					User.class);
+			User invitee = (User) manager.frame(graphDB.getVertex(inviteeID), User.class);
 
 			if (inviter != null && invitee != null) {
 				inviter.addFriendRequests(invitee);
@@ -418,8 +368,7 @@ public class Blueprints extends DB {
 	}
 
 	@Override
-	public int viewTopKResources(int requesterID, int profileOwnerID, int k,
-			Vector<HashMap<String, ByteIterator>> result) {
+	public int viewTopKResources(int requesterID, int profileOwnerID, int k, Vector<HashMap<String, ByteIterator>> result) {
 
 		int retVal = 0;
 
@@ -429,8 +378,7 @@ public class Blueprints extends DB {
 		int resCount = 0;
 
 		try {
-			User profileOwner = (User) manager.frame(
-					graphDB.getVertex(profileOwnerID), User.class);
+			User profileOwner = (User) manager.frame(graphDB.getVertex(profileOwnerID), User.class);
 
 			for (Resource resource : profileOwner.getResources()) {
 				resCount++;
@@ -439,10 +387,8 @@ public class Blueprints extends DB {
 
 				HashMap<String, ByteIterator> values = new HashMap<String, ByteIterator>();
 
-				values.put("creatorid",
-						new StringByteIterator(resource.getCreatorId()));
-				values.put("walluserid",
-						new StringByteIterator(resource.getWallUserId()));
+				values.put("creatorid", new StringByteIterator(resource.getCreatorId()));
+				values.put("walluserid", new StringByteIterator(resource.getWallUserId()));
 				values.put("type", new StringByteIterator(resource.getType()));
 				values.put("body", new StringByteIterator(resource.getBody()));
 				values.put("doc", new StringByteIterator(resource.getDoc()));
@@ -458,29 +404,21 @@ public class Blueprints extends DB {
 	}
 
 	@Override
-	public int getCreatedResources(int creatorID,
-			Vector<HashMap<String, ByteIterator>> result) {
+	public int getCreatedResources(int creatorID, Vector<HashMap<String, ByteIterator>> result) {
 		int retVal = 0;
 
 		try {
-			User member = (User) manager.frame(graphDB.getVertex(creatorID),
-					User.class);
+			User member = (User) manager.frame(graphDB.getVertex(creatorID), User.class);
 
 			for (Resource resource : member.getResources()) {
 				HashMap<String, ByteIterator> resourceHashMap = new HashMap<String, ByteIterator>();
 
-				resourceHashMap.put("rid",
-						new StringByteIterator(resource.getRid()));
-				resourceHashMap.put("creatorid", new StringByteIterator(
-						resource.getCreatorId()));
-				resourceHashMap.put("walluserid", new StringByteIterator(
-						resource.getWallUserId()));
-				resourceHashMap.put("type",
-						new StringByteIterator(resource.getType()));
-				resourceHashMap.put("body",
-						new StringByteIterator(resource.getBody()));
-				resourceHashMap.put("doc",
-						new StringByteIterator(resource.getDoc()));
+				resourceHashMap.put("rid", new StringByteIterator(resource.getRid()));
+				resourceHashMap.put("creatorid", new StringByteIterator(resource.getCreatorId()));
+				resourceHashMap.put("walluserid", new StringByteIterator(resource.getWallUserId()));
+				resourceHashMap.put("type", new StringByteIterator(resource.getType()));
+				resourceHashMap.put("body", new StringByteIterator(resource.getBody()));
+				resourceHashMap.put("doc", new StringByteIterator(resource.getDoc()));
 
 				result.add(resourceHashMap);
 			}
@@ -492,19 +430,15 @@ public class Blueprints extends DB {
 	}
 
 	@Override
-	public int viewCommentOnResource(int requesterID, int profileOwnerID,
-			int resourceID, Vector<HashMap<String, ByteIterator>> result) {
+	public int viewCommentOnResource(int requesterID, int profileOwnerID, int resourceID, Vector<HashMap<String, ByteIterator>> result) {
 
 		if (profileOwnerID < 0 || requesterID < 0 || resourceID < 0)
 			return -1;
 
 		try {
-			User requester = (User) manager.frame(
-					graphDB.getVertex(requesterID), User.class);
-			User profileOwner = (User) manager.frame(
-					graphDB.getVertex(profileOwnerID), User.class);
-			Resource resource = (Resource) manager.frame(
-					graphDB.getVertex(resourceID), Resource.class);
+			User requester = (User) manager.frame(graphDB.getVertex(requesterID), User.class);
+			User profileOwner = (User) manager.frame(graphDB.getVertex(profileOwnerID), User.class);
+			Resource resource = (Resource) manager.frame(graphDB.getVertex(resourceID), Resource.class);
 
 			Iterator<Manipulation> itr = resource.getManipulations().iterator();
 
@@ -512,13 +446,10 @@ public class Blueprints extends DB {
 				Manipulation m = itr.next();
 				HashMap<String, ByteIterator> values = new HashMap<String, ByteIterator>();
 				values.put("mid", new StringByteIterator(m.getMid()));
-				values.put("creatorid",
-						new StringByteIterator(m.getCreatorId()));
+				values.put("creatorid", new StringByteIterator(m.getCreatorId()));
 				values.put("content", new StringByteIterator(m.getContent()));
-				values.put("modifierid",
-						new StringByteIterator(m.getModifierId()));
-				values.put("timestamp",
-						new StringByteIterator(m.getTimestamp()));
+				values.put("modifierid", new StringByteIterator(m.getModifierId()));
+				values.put("timestamp", new StringByteIterator(m.getTimestamp()));
 				values.put("type", new StringByteIterator(m.getType()));
 				values.put("rid", new StringByteIterator(resource.getRid()));
 				result.add(values);
@@ -531,19 +462,13 @@ public class Blueprints extends DB {
 	}
 
 	@Override
-	public int postCommentOnResource(int commentCreatorID,
-			int resourceCreatorID, int resourceID,
-			HashMap<String, ByteIterator> values) {
+	public int postCommentOnResource(int commentCreatorID, int resourceCreatorID, int resourceID, HashMap<String, ByteIterator> values) {
 		try {
 
-			User commentCreator = (User) manager.frame(
-					graphDB.getVertex(commentCreatorID), User.class);
-			User resourceCreator = (User) manager.frame(
-					graphDB.getVertex(resourceCreatorID), User.class);
-			Resource resource = (Resource) manager.frame(
-					graphDB.getVertex(resourceID), Resource.class);
-			Manipulation m = manager.addEdge(values.get("mid").toString(),
-					resource, commentCreator, "manipulation");
+			User commentCreator = (User) manager.frame(graphDB.getVertex(commentCreatorID), User.class);
+			User resourceCreator = (User) manager.frame(graphDB.getVertex(resourceCreatorID), User.class);
+			Resource resource = (Resource) manager.frame(graphDB.getVertex(resourceID), Resource.class);
+			Manipulation m = manager.addEdge(values.get("mid").toString(), (Vertex) resource, (Vertex) commentCreator, "manipulation");
 
 			// Manipulation m = resource.addManipulations(commentCreator);
 
@@ -577,17 +502,14 @@ public class Blueprints extends DB {
 	}
 
 	@Override
-	public int delCommentOnResource(int resourceCreatorID, int resourceID,
-			int manipulationID) {
+	public int delCommentOnResource(int resourceCreatorID, int resourceID, int manipulationID) {
 
 		if (resourceCreatorID < 0 || manipulationID < 0 || resourceID < 0)
 			return -1;
 
-		Manipulation m = (Manipulation) manager.frame(graphDB.getEdge(manipulationID),
-				Manipulation.class);
+		Manipulation m = (Manipulation) manager.frame(graphDB.getEdge(manipulationID), Manipulation.class);
 
-		Resource resource = (Resource) manager.frame(
-				graphDB.getVertex(resourceID), Resource.class);
+		Resource resource = (Resource) manager.frame(graphDB.getVertex(resourceID), Resource.class);
 
 		try {
 
@@ -607,11 +529,9 @@ public class Blueprints extends DB {
 			return -1;
 
 		try {
-			User inviter = (User) manager.frame(graphDB.getVertex(friendid1),
-					User.class);
+			User inviter = (User) manager.frame(graphDB.getVertex(friendid1), User.class);
 
-			User invitee = (User) manager.frame(graphDB.getVertex(friendid2),
-					User.class);
+			User invitee = (User) manager.frame(graphDB.getVertex(friendid2), User.class);
 
 			if (inviter != null && invitee != null) {
 				for (User userReq : invitee.getFriends()) {
@@ -698,13 +618,11 @@ public class Blueprints extends DB {
 	}
 
 	@Override
-	public int queryPendingFriendshipIds(int memberID,
-			Vector<Integer> pendingIds) {
+	public int queryPendingFriendshipIds(int memberID, Vector<Integer> pendingIds) {
 		int retVal = 0;
 
 		try {
-			User member = (User) manager.frame(graphDB.getVertex(memberID),
-					User.class);
+			User member = (User) manager.frame(graphDB.getVertex(memberID), User.class);
 
 			for (User friend : member.getFriendRequests()) {
 				pendingIds.add(Integer.parseInt(friend.getUserID()));
@@ -717,13 +635,11 @@ public class Blueprints extends DB {
 	}
 
 	@Override
-	public int queryConfirmedFriendshipIds(int memberID,
-			Vector<Integer> confirmedIds) {
+	public int queryConfirmedFriendshipIds(int memberID, Vector<Integer> confirmedIds) {
 		int retVal = 0;
 
 		try {
-			User member = (User) manager.frame(graphDB.getVertex(memberID),
-					User.class);
+			User member = (User) manager.frame(graphDB.getVertex(memberID), User.class);
 
 			for (User friend : member.getFriends()) {
 				confirmedIds.add(Integer.parseInt(friend.getUserID()));
