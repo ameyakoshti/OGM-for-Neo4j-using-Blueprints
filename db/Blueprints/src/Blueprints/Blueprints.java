@@ -1,19 +1,15 @@
 package Blueprints;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
 
-import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.index.IndexHits;
-import org.neo4j.tooling.GlobalGraphOperations;
-
-import Blueprints.Interfaces.*;
+import Blueprints.Interfaces.Manipulation;
+import Blueprints.Interfaces.Resource;
+import Blueprints.Interfaces.User;
 
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.GraphFactory;
@@ -546,7 +542,7 @@ public class Blueprints extends DB {
 					graphDB.getVertex(resourceCreatorID), User.class);
 			Resource resource = (Resource) manager.frame(
 					graphDB.getVertex(resourceID), Resource.class);
-			Manipulation m = manager.addEgde(values.get("mid").toString(),
+			Manipulation m = manager.addEdge(values.get("mid").toString(),
 					resource, commentCreator, "manipulation");
 
 			// Manipulation m = resource.addManipulations(commentCreator);
@@ -559,7 +555,7 @@ public class Blueprints extends DB {
 					m.setCreatorId(entry.getValue().toString());
 				}
 				if (entry.getKey().equalsIgnoreCase("mid")) {
-					m.seMid(entry.getValue().toString());
+					m.setMid(entry.getValue().toString());
 				}
 				if (entry.getKey().equalsIgnoreCase("modifierid")) {
 					m.setModifierId(entry.getValue().toString());

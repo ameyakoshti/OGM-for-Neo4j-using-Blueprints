@@ -1,7 +1,5 @@
 package Blueprints.Interfaces;
 
-import CreatedInfo;
-
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
