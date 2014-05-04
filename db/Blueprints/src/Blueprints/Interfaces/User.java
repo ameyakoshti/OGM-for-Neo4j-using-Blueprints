@@ -2,8 +2,8 @@ package Blueprints.Interfaces;
 
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.Property;
 import com.tinkerpop.frames.Incidence;
+import com.tinkerpop.frames.Property;
 
 public interface User {
 
@@ -122,4 +122,9 @@ public interface User {
 	@Incidence(label = "manipulation", direction = Direction.OUT)
 	public Iterable<Manipulation> getAllManipulations();
 
+	//	@Adjacency(label = "created")
+	//	public Iterable<Resource> getCreatedProjects();
+
+	//	@Adjacency(label = "created")
+	//	public void addCreatedProject(Resource project);
 }

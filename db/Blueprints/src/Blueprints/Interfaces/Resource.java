@@ -43,15 +43,21 @@ public interface Resource extends VertexFrame {
 	@Property("doc")
 	public String getDoc();
 
-	@Adjacency(label = "created", direction = Direction.IN)
-	public Iterable<Resource> getCreatedByUser();
+	@Adjacency(label = "owns", direction = Direction.IN)
+	public User getCreatedByUser();
 
 	@Incidence(label = "manipulation")
 	public Iterable<Manipulation> getManipulations();
-	
+
 	@Incidence(label = "manipulation", direction = Direction.IN)
 	public Manipulation addManipulations(User user);
-	
+
 	@Incidence(label = "manipulation")
 	public void removeManipulations(Manipulation manipulaltion);
+
+	//	@Adjacency(label = "created", direction = Direction.IN)
+	//	public Iterable<User> getCreatedByPerson();
+
+	//	@Incidence(label = "created", direction = Direction.IN)
+	//	public Iterable<CreatedInfo> getCreatedInfo();
 }

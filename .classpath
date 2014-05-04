@@ -28,33 +28,26 @@
 	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/lib/testng-6.3.1.jar"/>
 	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/lib/WhalinMemcached.jar"/>
 	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/lib/xmemcached-1.3.8.jar"/>
-	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Neo4j/lib/concurrentlinkedhashmap-lru-1.3.1.jar"/>
-	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Neo4j/lib/geronimo-jta_1.1_spec-1.1.1.jar"/>
-	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Neo4j/lib/lucene-core-3.6.2.jar"/>
-	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Neo4j/lib/neo4j-cypher-2.0.1.jar"/>
-	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Neo4j/lib/neo4j-cypher-commons-2.0.1.jar"/>
-	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Neo4j/lib/neo4j-cypher-compiler-1.9-2.0.1.jar"/>
-	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Neo4j/lib/neo4j-cypher-compiler-2.0-2.0.1.jar"/>
-	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Neo4j/lib/neo4j-graph-algo-2.0.1.jar"/>
-	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Neo4j/lib/neo4j-graph-matching-2.0.1.jar"/>
-	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Neo4j/lib/neo4j-jmx-2.0.1.jar"/>
-	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Neo4j/lib/neo4j-kernel-2.0.1.jar"/>
-	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Neo4j/lib/neo4j-lucene-index-2.0.1.jar"/>
-	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Neo4j/lib/neo4j-shell-2.0.1.jar"/>
-	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Neo4j/lib/neo4j-udc-2.0.1.jar"/>
-	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Neo4j/lib/org.apache.servicemix.bundles.jline-0.9.94_1.jar"/>
-	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Neo4j/lib/parboiled-core-1.1.6.jar"/>
-	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Neo4j/lib/parboiled-scala_2.10-1.1.6.jar"/>
-	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Neo4j/lib/scala-library-2.10.3.jar"/>
-	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Neo4j/lib/server-api-2.0.1.jar"/>
 	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Blueprints/lib/commons-configuration-1.10.jar"/>
 	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Blueprints/lib/commons-lang-2.6.jar"/>
 	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Blueprints/lib/commons-logging-1.1.3.jar"/>
 	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Blueprints/lib/frames/frames-2.5.0.jar"/>
 	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Blueprints/lib/frames/frames-kibble-2.5.0.jar"/>
+	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Blueprints/lib/neo4j/concurrentlinkedhashmap-lru-1.3.1.jar"/>
+	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Blueprints/lib/neo4j/geronimo-jta_1.1_spec-1.1.1.jar"/>
+	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Blueprints/lib/neo4j/lucene-core-3.5.0.jar"/>
+	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Blueprints/lib/neo4j/neo4j-cypher-1.8.3.jar"/>
+	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Blueprints/lib/neo4j/neo4j-graph-algo-1.8.3.jar"/>
+	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Blueprints/lib/neo4j/neo4j-graph-matching-1.8.3.jar"/>
+	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Blueprints/lib/neo4j/neo4j-jmx-1.8.3.jar"/>
+	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Blueprints/lib/neo4j/neo4j-kernel-1.8.3.jar"/>
+	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Blueprints/lib/neo4j/neo4j-lucene-index-1.8.3.jar"/>
+	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Blueprints/lib/neo4j/neo4j-shell-1.8.3.jar"/>
+	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Blueprints/lib/neo4j/neo4j-udc-1.8.3.jar"/>
+	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Blueprints/lib/neo4j/org.apache.servicemix.bundles.jline-0.9.94_1.jar"/>
+	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Blueprints/lib/neo4j/scala-library-2.9.1-1.jar"/>
+	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Blueprints/lib/neo4j/server-api-1.8.3.jar"/>
 	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Blueprints/lib/blueprints/blueprints-core-2.4.0.jar"/>
 	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Blueprints/lib/blueprints/blueprints-neo4j-graph-2.4.0.jar"/>
-	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Blueprints/lib/rexster/blueprints-rexster-graph-2.5.0.jar"/>
-	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/db/Blueprints/lib/rexster/jettison-1.3.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

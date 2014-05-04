@@ -12,8 +12,8 @@ import Blueprints.Interfaces.Resource;
 import Blueprints.Interfaces.User;
 
 import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.GraphFactory;
 import com.tinkerpop.blueprints.Vertex;
+import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 import com.tinkerpop.frames.FramedGraph;
 import com.tinkerpop.frames.FramedGraphFactory;
 
@@ -24,12 +24,13 @@ import edu.usc.bg.base.StringByteIterator;
 
 public class Blueprints extends DB {
 
-	private static final String DB_PROPERTY_PATH = "Blueprints/graph.properties";
+	private static final String DB_PROPERTY_PATH = "graph.properties";
 
 	// START SNIPPET: vars
 	static Graph graphDB;
-	FramedGraphFactory factory;
-	FramedGraph<Graph> manager;
+	static FramedGraphFactory factory;
+	static FramedGraph<Graph> manager;
+	static int maxUsers;
 
 	// END SNIPPET: vars
 
@@ -38,10 +39,12 @@ public class Blueprints extends DB {
 	public boolean init() {
 		if (graphDB == null) {
 			try {
-				graphDB = GraphFactory.open(DB_PROPERTY_PATH);
+				//graphDB = GraphFactory.open(DB_PROPERTY_PATH);
+				graphDB = new Neo4jGraph("db/Blueprints/neo4jdb");
 				factory = new FramedGraphFactory();
 				manager = factory.create(graphDB);
-				// registerShutdownHook(graphDB);
+				maxUsers = 0;
+				System.out.println("inside init");
 			} catch (Exception e) {
 				System.out.println(e);
 			}
@@ -55,11 +58,11 @@ public class Blueprints extends DB {
 		if (entitySet == null) {
 			return -1;
 		}
-
-		// clearDb();
-
+		System.out.println("inside insert");
 		if (entitySet.equalsIgnoreCase("users")) {
 			// for users
+			maxUsers++;
+			System.out.println("creating user" + entityPK);
 			try {
 				manager.addVertex(entityPK);
 				User user = (User) manager.frame(graphDB.getVertex(entityPK), User.class);
@@ -93,13 +96,15 @@ public class Blueprints extends DB {
 					if (insertImage && entry.getKey().equalsIgnoreCase("pic"))
 						user.setPic(entry.getValue().toString());
 				}
-
 			} catch (Exception e) {
 				System.out.println("insertEntity Users : " + e.toString());
 				return -1;
 			}
 		} else if (entitySet.equalsIgnoreCase("resources")) {
 			// for resources
+			int entityPKtemp = maxUsers + Integer.parseInt(entityPK);
+			entityPK = "" + entityPKtemp;
+			System.out.println("creating resource" + entityPK);
 			try {
 				manager.addVertex(entityPK);
 				Resource resource = (Resource) manager.frame(graphDB.getVertex(entityPK), Resource.class);
@@ -124,8 +129,8 @@ public class Blueprints extends DB {
 
 				// connect the resource to the user who created it
 				User user = (User) manager.frame(graphDB.getVertex(creatorID), User.class);
+				// System.out.println("resource not added to user");
 				user.addResource(resource);
-
 			} catch (Exception e) {
 				System.out.println("insertEntity Resources : " + e.toString());
 				return -1;
@@ -297,7 +302,7 @@ public class Blueprints extends DB {
 		int retVal = 0;
 		if (inviterID < 0 || inviteeID < 0)
 			return -1;
-
+		//System.out.println("inside acceptFriend");
 		try {
 			User inviter = (User) manager.frame(graphDB.getVertex(inviterID), User.class);
 
@@ -351,7 +356,7 @@ public class Blueprints extends DB {
 		int retVal = 0;
 		if (inviterID < 0 || inviteeID < 0)
 			return -1;
-
+		//System.out.println("inside inviteFriend");
 		try {
 			User inviter = (User) manager.frame(graphDB.getVertex(inviterID), User.class);
 
@@ -436,10 +441,9 @@ public class Blueprints extends DB {
 			return -1;
 
 		try {
-			User requester = (User) manager.frame(graphDB.getVertex(requesterID), User.class);
-			User profileOwner = (User) manager.frame(graphDB.getVertex(profileOwnerID), User.class);
+			//User requester = (User) manager.frame(graphDB.getVertex(requesterID), User.class);
+			//User profileOwner = (User) manager.frame(graphDB.getVertex(profileOwnerID), User.class);
 			Resource resource = (Resource) manager.frame(graphDB.getVertex(resourceID), Resource.class);
-
 			Iterator<Manipulation> itr = resource.getManipulations().iterator();
 
 			while (itr.hasNext()) {
@@ -466,9 +470,9 @@ public class Blueprints extends DB {
 		try {
 
 			User commentCreator = (User) manager.frame(graphDB.getVertex(commentCreatorID), User.class);
-			User resourceCreator = (User) manager.frame(graphDB.getVertex(resourceCreatorID), User.class);
+			//User resourceCreator = (User) manager.frame(graphDB.getVertex(resourceCreatorID), User.class);
 			Resource resource = (Resource) manager.frame(graphDB.getVertex(resourceID), Resource.class);
-			Manipulation m = manager.addEdge(values.get("mid").toString(), (Vertex) resource, (Vertex) commentCreator, "manipulation");
+			Manipulation m = (Manipulation) manager.addEdge(values.get("mid").toString(), (Vertex) resource, (Vertex) commentCreator, "manipulation");
 
 			// Manipulation m = resource.addManipulations(commentCreator);
 
@@ -508,11 +512,9 @@ public class Blueprints extends DB {
 			return -1;
 
 		Manipulation m = (Manipulation) manager.frame(graphDB.getEdge(manipulationID), Manipulation.class);
-
 		Resource resource = (Resource) manager.frame(graphDB.getVertex(resourceID), Resource.class);
 
 		try {
-
 			resource.removeManipulations(m);
 
 		} catch (Exception ex) {
