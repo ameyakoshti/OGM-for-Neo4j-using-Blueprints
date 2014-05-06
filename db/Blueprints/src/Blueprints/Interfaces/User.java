@@ -2,10 +2,10 @@ package Blueprints.Interfaces;
 
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
-import com.tinkerpop.frames.Incidence;
 import com.tinkerpop.frames.Property;
+import com.tinkerpop.frames.VertexFrame;
 
-public interface User {
+public interface User extends VertexFrame {
 
 	// Setting all the attributes
 	@Property("userid")
@@ -118,13 +118,12 @@ public interface User {
 	@Adjacency(label = "owns")
 	public void addResource(Resource resource);
 
-	// Setting incidences
-	@Incidence(label = "manipulation", direction = Direction.OUT)
-	public Iterable<Manipulation> getAllManipulations();
+	@Adjacency(label = "creates")
+	public void addManipulation(Manipulation manipulation);
 
-	//	@Adjacency(label = "created")
-	//	public Iterable<Resource> getCreatedProjects();
+	@Adjacency(label = "creates")
+	public void removeManipulation(Manipulation manipulation);
 
-	//	@Adjacency(label = "created")
-	//	public void addCreatedProject(Resource project);
+	@Adjacency(label = "creates")
+	public Iterable<Manipulation> getManipulation();
 }

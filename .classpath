@@ -5,7 +5,6 @@
 	<classpathentry kind="src" path="db/jdbc/src"/>
 	<classpathentry kind="src" path="db/BGVerifyCorrectness/src"/>
 	<classpathentry kind="src" path="db/MongoDB/src"/>
-	<classpathentry kind="src" path="db/Neo4j/src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.launching.macosx.MacOSXType/Java SE 7 [1.7.0_04]"/>
 	<classpathentry kind="lib" path="/Users/ameyakoshti/Documents/workspace/BG/lib/ant-contrib-1.0b3.jar"/>

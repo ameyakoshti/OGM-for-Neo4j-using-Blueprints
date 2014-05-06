@@ -29,6 +29,7 @@ public class Blueprints extends DB {
 	// START SNIPPET: vars
 	//static Graph graphDB;
 	static int maxUsers = 1;
+
 	// END SNIPPET: vars
 
 	// START SNIPPET: implement abstract functions
@@ -108,6 +109,8 @@ public class Blueprints extends DB {
 			} catch (Exception e) {
 				System.out.println("insertEntity Users : " + e.toString());
 				return -1;
+			} finally {
+				graphDB.shutdown();
 			}
 		} else if (entitySet.equalsIgnoreCase("resources")) {
 			// adding resources
@@ -153,9 +156,10 @@ public class Blueprints extends DB {
 			} catch (Exception e) {
 				System.out.println("insertEntity Resources : " + e.toString());
 				return -1;
+			} finally {
+				graphDB.shutdown();
 			}
 		}
-		graphDB.shutdown();
 		return 0;
 	}
 
@@ -215,8 +219,9 @@ public class Blueprints extends DB {
 		} catch (Exception e) {
 			System.out.println("viewProfile : " + e.toString());
 			retVal = -1;
+		} finally {
+			graphDB.shutdown();
 		}
-		graphDB.shutdown();
 		return retVal;
 	}
 
@@ -230,58 +235,63 @@ public class Blueprints extends DB {
 		FramedGraph<Graph> manager = factory.create(graphDB);
 
 		User profileOwner = manager.getVertex(profileOwnerID, User.class);
+		try {
+			for (User friends : profileOwner.getFriends()) {
+				HashMap<String, ByteIterator> hm = new HashMap<>();
 
-		for (User friends : profileOwner.getFriends()) {
-			HashMap<String, ByteIterator> hm = new HashMap<>();
-
-			if (fields == null || fields.isEmpty()) {
-				hm.put("userid", new StringByteIterator(friends.getUserID()));
-				hm.put("username", new StringByteIterator(friends.getUsername()));
-				hm.put("pw", new StringByteIterator(friends.getPw()));
-				hm.put("fname", new StringByteIterator(friends.getFName()));
-				hm.put("lname", new StringByteIterator(friends.getLName()));
-				hm.put("gender", new StringByteIterator(friends.getGender()));
-				hm.put("dob", new StringByteIterator(friends.getDOB()));
-				hm.put("jdate", new StringByteIterator(friends.getJDate()));
-				hm.put("ldate", new StringByteIterator(friends.getLDate()));
-				hm.put("address", new StringByteIterator(friends.getAddress()));
-				hm.put("email", new StringByteIterator(friends.getEmail()));
-				hm.put("tel", new StringByteIterator(friends.getTel()));
-			} else {
-				for (String field : fields) {
-					if (field.equalsIgnoreCase("userid")) {
-						hm.put("userid", new StringByteIterator(friends.getUserID()));
-					} else if (field.equalsIgnoreCase("username")) {
-						hm.put("username", new StringByteIterator(friends.getUsername()));
-					} else if (field.equalsIgnoreCase("pw")) {
-						hm.put("pw", new StringByteIterator(friends.getPw()));
-					} else if (field.equalsIgnoreCase("fname")) {
-						hm.put("fname", new StringByteIterator(friends.getFName()));
-					} else if (field.equalsIgnoreCase("lname")) {
-						hm.put("lname", new StringByteIterator(friends.getLName()));
-					} else if (field.equalsIgnoreCase("gender")) {
-						hm.put("gender", new StringByteIterator(friends.getGender()));
-					} else if (field.equalsIgnoreCase("dob")) {
-						hm.put("dob", new StringByteIterator(friends.getDOB()));
-					} else if (field.equalsIgnoreCase("jdate")) {
-						hm.put("jdate", new StringByteIterator(friends.getJDate()));
-					} else if (field.equalsIgnoreCase("ldate")) {
-						hm.put("ldate", new StringByteIterator(friends.getLDate()));
-					} else if (field.equalsIgnoreCase("address")) {
-						hm.put("address", new StringByteIterator(friends.getAddress()));
-					} else if (field.equalsIgnoreCase("email")) {
-						hm.put("email", new StringByteIterator(friends.getEmail()));
-					} else if (field.equalsIgnoreCase("tel")) {
-						hm.put("tel", new StringByteIterator(friends.getTel()));
+				if (fields == null || fields.isEmpty()) {
+					hm.put("userid", new StringByteIterator(friends.getUserID()));
+					hm.put("username", new StringByteIterator(friends.getUsername()));
+					hm.put("pw", new StringByteIterator(friends.getPw()));
+					hm.put("fname", new StringByteIterator(friends.getFName()));
+					hm.put("lname", new StringByteIterator(friends.getLName()));
+					hm.put("gender", new StringByteIterator(friends.getGender()));
+					hm.put("dob", new StringByteIterator(friends.getDOB()));
+					hm.put("jdate", new StringByteIterator(friends.getJDate()));
+					hm.put("ldate", new StringByteIterator(friends.getLDate()));
+					hm.put("address", new StringByteIterator(friends.getAddress()));
+					hm.put("email", new StringByteIterator(friends.getEmail()));
+					hm.put("tel", new StringByteIterator(friends.getTel()));
+				} else {
+					for (String field : fields) {
+						if (field.equalsIgnoreCase("userid")) {
+							hm.put("userid", new StringByteIterator(friends.getUserID()));
+						} else if (field.equalsIgnoreCase("username")) {
+							hm.put("username", new StringByteIterator(friends.getUsername()));
+						} else if (field.equalsIgnoreCase("pw")) {
+							hm.put("pw", new StringByteIterator(friends.getPw()));
+						} else if (field.equalsIgnoreCase("fname")) {
+							hm.put("fname", new StringByteIterator(friends.getFName()));
+						} else if (field.equalsIgnoreCase("lname")) {
+							hm.put("lname", new StringByteIterator(friends.getLName()));
+						} else if (field.equalsIgnoreCase("gender")) {
+							hm.put("gender", new StringByteIterator(friends.getGender()));
+						} else if (field.equalsIgnoreCase("dob")) {
+							hm.put("dob", new StringByteIterator(friends.getDOB()));
+						} else if (field.equalsIgnoreCase("jdate")) {
+							hm.put("jdate", new StringByteIterator(friends.getJDate()));
+						} else if (field.equalsIgnoreCase("ldate")) {
+							hm.put("ldate", new StringByteIterator(friends.getLDate()));
+						} else if (field.equalsIgnoreCase("address")) {
+							hm.put("address", new StringByteIterator(friends.getAddress()));
+						} else if (field.equalsIgnoreCase("email")) {
+							hm.put("email", new StringByteIterator(friends.getEmail()));
+						} else if (field.equalsIgnoreCase("tel")) {
+							hm.put("tel", new StringByteIterator(friends.getTel()));
+						}
 					}
 				}
+				if (insertImage) {
+					hm.put("pic", new StringByteIterator(friends.getTpic()));
+				}
+				result.add(hm);
 			}
-			if (insertImage) {
-				hm.put("pic", new StringByteIterator(friends.getTpic()));
-			}
-			result.add(hm);
+		} catch (Exception e) {
+			System.out.println("listFriends : " + e.toString());
+			retVal = -1;
+		} finally {
+			graphDB.shutdown();
 		}
-		graphDB.shutdown();
 		return retVal;
 	}
 
@@ -326,7 +336,9 @@ public class Blueprints extends DB {
 			retVal = -1;
 		}
 
-		graphDB.shutdown();
+		finally {
+			graphDB.shutdown();
+		}
 		return retVal;
 	}
 
@@ -349,6 +361,7 @@ public class Blueprints extends DB {
 					if (userReq.getUserID().equals(inviter.getUserID())) {
 						invitee.removeFriendRequests(inviter);
 						invitee.addFriend(inviter);
+						inviter.addFriend(invitee);
 						break;
 					}
 				}
@@ -356,8 +369,9 @@ public class Blueprints extends DB {
 		} catch (Exception e) {
 			System.out.println("acceptFriend : " + e.toString());
 			retVal = -1;
+		} finally {
+			graphDB.shutdown();
 		}
-		graphDB.shutdown();
 		return retVal;
 	}
 
@@ -388,8 +402,9 @@ public class Blueprints extends DB {
 		} catch (Exception e) {
 			System.out.println("rejectFriend : " + e.toString());
 			retVal = -1;
+		} finally {
+			graphDB.shutdown();
 		}
-		graphDB.shutdown();
 		return retVal;
 	}
 
@@ -409,13 +424,14 @@ public class Blueprints extends DB {
 			User invitee = (User) manager.frame(graphDB.getVertex(inviteeID), User.class);
 
 			if (inviter != null && invitee != null) {
-				inviter.addFriendRequests(invitee);
+				invitee.addFriendRequests(inviter);
 			}
 		} catch (Exception e) {
 			System.out.println("inviteFriend : " + e.toString());
 			retVal = -1;
+		} finally {
+			graphDB.shutdown();
 		}
-		graphDB.shutdown();
 		return retVal;
 	}
 
@@ -451,8 +467,9 @@ public class Blueprints extends DB {
 		} catch (Exception e) {
 			System.out.println("viewTopKResources : " + e.toString());
 			retVal = -1;
+		} finally {
+			graphDB.shutdown();
 		}
-		graphDB.shutdown();
 		return retVal;
 	}
 
@@ -482,8 +499,9 @@ public class Blueprints extends DB {
 		} catch (Exception e) {
 			System.out.println("acceptFriend : " + e.toString());
 			retVal = -1;
+		} finally {
+			graphDB.shutdown();
 		}
-		graphDB.shutdown();
 		return retVal;
 	}
 
@@ -498,8 +516,6 @@ public class Blueprints extends DB {
 		FramedGraph<Graph> manager = factory.create(graphDB);
 
 		try {
-			//User requester = (User) manager.frame(graphDB.getVertex(requesterID), User.class);
-			//User profileOwner = (User) manager.frame(graphDB.getVertex(profileOwnerID), User.class);
 			Resource resource = (Resource) manager.frame(graphDB.getVertex(resourceID), Resource.class);
 			Iterator<Manipulation> itr = resource.getManipulations().iterator();
 
@@ -518,8 +534,9 @@ public class Blueprints extends DB {
 		} catch (Exception ex) {
 			System.out.println("viewCommentOnResource :" + ex.getMessage());
 			return -1;
+		} finally {
+			graphDB.shutdown();
 		}
-		graphDB.shutdown();
 		return 0;
 	}
 
@@ -532,39 +549,47 @@ public class Blueprints extends DB {
 
 		try {
 			User commentCreator = (User) manager.frame(graphDB.getVertex(commentCreatorID), User.class);
-			//User resourceCreator = (User) manager.frame(graphDB.getVertex(resourceCreatorID), User.class);
 			Resource resource = (Resource) manager.frame(graphDB.getVertex(resourceID), Resource.class);
-			Manipulation m = (Manipulation) manager.addEdge(values.get("mid").toString(), (Vertex) resource, (Vertex) commentCreator, "manipulation");
 
-			// Manipulation m = resource.addManipulations(commentCreator);
+			manager.addVertex(values.get("mid").toString());
+			Manipulation manipulation = (Manipulation) manager.frame(graphDB.getVertex(values.get("mid").toString()), Manipulation.class);
+
+			manipulation.setRid(String.valueOf(resourceID));
 
 			for (Map.Entry<String, ByteIterator> entry : values.entrySet()) {
+				if (entry.getKey().equalsIgnoreCase("rid")) {
+					System.out.println("Resource ID: " + entry.getValue().toString());
+					manipulation.setRid(entry.getValue().toString());
+				}
 				if (entry.getKey().equalsIgnoreCase("content")) {
-					m.setContent(entry.getValue().toString());
+					manipulation.setContent(entry.getValue().toString());
 				}
 				if (entry.getKey().equalsIgnoreCase("creatorid")) {
-					m.setCreatorId(entry.getValue().toString());
+					manipulation.setCreatorId(entry.getValue().toString());
 				}
 				if (entry.getKey().equalsIgnoreCase("mid")) {
-					m.setMid(entry.getValue().toString());
+					System.out.println("Manipulation ID: " + entry.getValue().toString());
+					manipulation.setMid(entry.getValue().toString());
 				}
 				if (entry.getKey().equalsIgnoreCase("modifierid")) {
-					m.setModifierId(entry.getValue().toString());
+					manipulation.setModifierId(entry.getValue().toString());
 				}
 				if (entry.getKey().equalsIgnoreCase("timestamp")) {
-					m.setTimestamp(entry.getValue().toString());
+					manipulation.setTimestamp(entry.getValue().toString());
 				}
 				if (entry.getKey().equalsIgnoreCase("type")) {
-					m.setType(entry.getValue().toString());
+					manipulation.setType(entry.getValue().toString());
 				}
-
 			}
+			commentCreator.addManipulation(manipulation);
+			resource.addManipulation(manipulation);
 
 		} catch (Exception ex) {
 			System.out.println("postCommentOnResource :" + ex.getMessage());
 			return -1;
+		} finally {
+			graphDB.shutdown();
 		}
-		graphDB.shutdown();
 		return 0;
 	}
 
@@ -578,17 +603,18 @@ public class Blueprints extends DB {
 		FramedGraphFactory factory = new FramedGraphFactory();
 		FramedGraph<Graph> manager = factory.create(graphDB);
 
-		Manipulation m = (Manipulation) manager.frame(graphDB.getEdge(manipulationID), Manipulation.class);
+		Manipulation manipulation = (Manipulation) manager.frame(graphDB.getVertex(manipulationID), Manipulation.class);
 		Resource resource = (Resource) manager.frame(graphDB.getVertex(resourceID), Resource.class);
 
 		try {
-			resource.removeManipulations(m);
+			resource.removeManipulation(manipulation);
 
 		} catch (Exception ex) {
 			System.out.println("delCommentOnResource :" + ex.getMessage());
 			return -1;
+		} finally {
+			graphDB.shutdown();
 		}
-		graphDB.shutdown();
 		return 0;
 	}
 
@@ -612,6 +638,7 @@ public class Blueprints extends DB {
 					// Check if the 2nd user is a friend.
 					if (userReq.getUserID().equals(inviter.getUserID())) {
 						invitee.removeFriend(inviter);
+						inviter.removeFriend(invitee);
 						break;
 					}
 				}
@@ -619,8 +646,9 @@ public class Blueprints extends DB {
 		} catch (Exception e) {
 			System.out.println("thawFriendship : " + e.toString());
 			retVal = -1;
+		} finally {
+			graphDB.shutdown();
 		}
-		graphDB.shutdown();
 		return retVal;
 	}
 
@@ -673,14 +701,14 @@ public class Blueprints extends DB {
 
 		} catch (Exception e) {
 			System.out.println("getInitialStats : " + e.toString());
+		} finally {
+			graphDB.shutdown();
 		}
-
 		stats.put("usercount", Double.toString(usercnt));
 		stats.put("avgfriendsperuser", Double.toString(frndCount));
 		stats.put("avgpendingperuser", Double.toString(pendCount));
 		stats.put("resourcesperuser", Double.toString(resCount));
 
-		graphDB.shutdown();
 		return stats;
 	}
 
@@ -712,8 +740,9 @@ public class Blueprints extends DB {
 		} catch (Exception e) {
 			System.out.println("acceptFriend : " + e.toString());
 			retVal = -1;
+		} finally {
+			graphDB.shutdown();
 		}
-		graphDB.shutdown();
 		return retVal;
 	}
 
@@ -734,8 +763,9 @@ public class Blueprints extends DB {
 		} catch (Exception e) {
 			System.out.println("acceptFriend : " + e.toString());
 			retVal = -1;
+		} finally {
+			graphDB.shutdown();
 		}
-		graphDB.shutdown();
 		return retVal;
 	}
 	// END SNIPPET: implement abstract functions

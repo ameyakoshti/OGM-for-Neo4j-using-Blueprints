@@ -1,19 +1,17 @@
 package Blueprints.Interfaces;
 
-import com.tinkerpop.frames.EdgeFrame;
-import com.tinkerpop.frames.InVertex;
-import com.tinkerpop.frames.OutVertex;
 import com.tinkerpop.frames.Property;
+import com.tinkerpop.frames.VertexFrame;
 
-public interface Manipulation extends EdgeFrame {
+public interface Manipulation extends VertexFrame {
 	@Property("mid")
 	public void setMid(String mid);
 
 	@Property("creatorid")
 	public void setCreatorId(String creatorid);
 
-//	@Property("rid")
-//	public void setRid(String rid);
+	@Property("rid")
+	public void setRid(String rid);
 
 	@Property("modifierid")
 	public void setModifierId(String modifierid);
@@ -27,15 +25,15 @@ public interface Manipulation extends EdgeFrame {
 	@Property("content")
 	public void setContent(String content);
 
-//	@Property("rid")
-//	public String getRid();
+	@Property("rid")
+	public String getRid();
 
 	@Property("creatorid")
 	public String getCreatorId();
-	
+
 	@Property("mid")
 	public String getMid();
-	
+
 	@Property("modifierid")
 	public String getModifierId();
 
@@ -47,10 +45,4 @@ public interface Manipulation extends EdgeFrame {
 
 	@Property("content")
 	public String getContent();
-
-	@OutVertex
-    User getUser();
-
-    @InVertex
-    Resource getResource();
 }
