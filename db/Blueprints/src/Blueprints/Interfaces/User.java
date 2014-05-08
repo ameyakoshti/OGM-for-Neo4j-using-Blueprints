@@ -3,9 +3,8 @@ package Blueprints.Interfaces;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
-import com.tinkerpop.frames.VertexFrame;
 
-public interface User extends VertexFrame {
+public interface User {
 
 	// Setting all the attributes
 	@Property("userid")
