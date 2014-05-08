@@ -3,9 +3,8 @@ package Blueprints.Interfaces;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.frames.Adjacency;
 import com.tinkerpop.frames.Property;
-import com.tinkerpop.frames.VertexFrame;
 
-public interface Resource extends VertexFrame {
+public interface Resource {
 	@Property("rid")
 	public void setRid(String rid);
 
@@ -42,7 +41,7 @@ public interface Resource extends VertexFrame {
 	@Property("doc")
 	public String getDoc();
 
-	@Adjacency(label = "owns", direction = Direction.IN)
+	@Adjacency(label = "owns")
 	public User getCreatedByUser();
 
 	@Adjacency(label = "creates")

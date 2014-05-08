@@ -27,51 +27,52 @@ public class Blueprints extends DB {
 	//private static final String DB_PROPERTY_PATH = "graph.properties";
 
 	// START SNIPPET: vars
-	//static Graph graphDB;
-	static int maxUsers = 1;
+	static String dbLocation = "db/Blueprints/neo4jdb";
+	static Graph graphDB;
+	static FramedGraphFactory factory;
+	static FramedGraph<Graph> manager;
+	static int maxUsers = 100;
 
 	// END SNIPPET: vars
 
 	// START SNIPPET: implement abstract functions
 	@Override
 	public boolean init() {
-		//if (graphDB == null) {
-		try {
-			//graphDB = GraphFactory.open(DB_PROPERTY_PATH);
-			//graphDB = new Neo4jGraph("db/Blueprints/neo4jdb");
-			//factory = new FramedGraphFactory();
-			//manager = factory.create(graphDB);
+		//System.out.println("inside init");
 
-			// this has to start from one as we have to skip two nodes after creating the user nodes and before 
-			// creating the resource nodes.
-			//maxUsers = 1;
-			//System.out.println("inside init");
-		} catch (Exception e) {
-			System.out.println(e);
+		if (graphDB == null) {
+			try {
+				// Although we create a connection in init, we have to check in every function if the connection is active,
+				// this is because sometimes grapgdb is set to null randomly. Even after a intensive debugging we could not find
+				// a particular reason for this behavior.
+				graphDB = new Neo4jGraph(dbLocation);
+				factory = new FramedGraphFactory();
+				manager = factory.create(graphDB);
+				//registerShutdownHook(graphDB);
+			} catch (Exception e) {
+				System.out.println(e);
+			}
 		}
-
-		//		}
 		return true;
 	}
 
 	@Override
 	public int insertEntity(String entitySet, String entityPK, HashMap<String, ByteIterator> values, boolean insertImage) {
+		//System.out.println("inside insert");
+
 		if (entitySet == null) {
 			return -1;
 		}
 
-		Graph graphDB = new Neo4jGraph("db/Blueprints/neo4jdb");
-		FramedGraphFactory factory = new FramedGraphFactory();
-		FramedGraph<Graph> manager = factory.create(graphDB);
+		if (graphDB == null) {
+			graphDB = new Neo4jGraph(dbLocation);
+			factory = new FramedGraphFactory();
+			manager = factory.create(graphDB);
+		}
 
-		//System.out.println("inside insert");		
 		if (entitySet.equalsIgnoreCase("users")) {
 			// adding users
-
-			//FramedGraphFactory factoryU = new FramedGraphFactory();
-			//FramedGraph<Graph> managerU = factoryU.create(graphDB);
-
-			System.out.println("creating user" + entityPK);
+			//System.out.println("creating user" + entityPK);
 			try {
 				manager.addVertex(entityPK);
 				User user = (User) manager.frame(graphDB.getVertex(entityPK), User.class);
@@ -110,27 +111,29 @@ public class Blueprints extends DB {
 				System.out.println("insertEntity Users : " + e.toString());
 				return -1;
 			} finally {
+				// We need to shutdown the connection while loading data.
+				// Else the data does not commit and relationships are lost.
 				graphDB.shutdown();
 			}
 		} else if (entitySet.equalsIgnoreCase("resources")) {
 			// adding resources
 
-			// we have to close the connection (at least once) here because with the current instance of graphdb, there is an extra 101th and 102th vertex which is not accessible. (probably a lock by grapdb)
+			// We have to close the connection (at least once) here because with the current instance of graphdb, there is an extra 101th and 102th vertex which is not accessible. (probably a lock by grapdb)
 			// this vertex cannot be accessed for resources class and we end up skipping an id but it does not work as the ids of every vertex has to be consecutive
 			// the shutdown command have been moved to the end of this function.
 			//graphDB.shutdown();
 
 			entityPK = Integer.toString(maxUsers + Integer.parseInt(entityPK));
 
-			System.out.println("creating resource" + entityPK);
+			//System.out.println("creating resource" + entityPK);
 			try {
-				// after a lot of trail and error, we have figured out that it does not matter what id you create a vertex with
-				// but you have to add a vertex with any id previously created, then it can be accessed by the current counter (!= id used) 
+				// After a lot of trail and error, we have figured out that it does not matter what id you create a vertex with
+				// but we have to add a vertex with any id previously created, then it can be accessed by the current counter (!= id used) 
 				manager.addVertex(entityPK);
 				Resource resource = (Resource) manager.frame(graphDB.getVertex(entityPK), Resource.class);
 				resource.setRid(entityPK);
 
-				String creatorID = "1";
+				String creatorID = null;
 
 				for (Map.Entry<String, ByteIterator> entry : values.entrySet()) {
 					if (entry.getKey().equalsIgnoreCase("creatorid")) {
@@ -149,10 +152,8 @@ public class Blueprints extends DB {
 
 				// connect the resource to the user who created it
 				User user = (User) manager.frame(graphDB.getVertex(creatorID), User.class);
-				if (user != null) {
-					System.out.println("------>>>>user found");
+				if (user != null) 
 					user.addResource(resource);
-				}
 			} catch (Exception e) {
 				System.out.println("insertEntity Resources : " + e.toString());
 				return -1;
@@ -165,17 +166,22 @@ public class Blueprints extends DB {
 
 	@Override
 	public int viewProfile(int requesterID, int profileOwnerID, HashMap<String, ByteIterator> result, boolean insertImage, boolean testMode) {
+		//System.out.println("inside viewProfile");
+
 		int retVal = 0;
 
 		if (requesterID < 0 || profileOwnerID < 0)
 			return -1;
 
-		Graph graphDB = new Neo4jGraph("db/Blueprints/neo4jdb");
-		FramedGraphFactory factory = new FramedGraphFactory();
-		FramedGraph<Graph> manager = factory.create(graphDB);
 		double frndCount = 0, pendCount = 0, resCount = 0;
 
 		try {
+			if (graphDB == null) {
+				graphDB = new Neo4jGraph(dbLocation);
+				factory = new FramedGraphFactory();
+				manager = factory.create(graphDB);
+			}
+
 			User profileOwner = (User) manager.frame(graphDB.getVertex(profileOwnerID), User.class);
 
 			// total friends and pending requests of a user
@@ -220,22 +226,29 @@ public class Blueprints extends DB {
 			System.out.println("viewProfile : " + e.toString());
 			retVal = -1;
 		} finally {
-			graphDB.shutdown();
+			//			graphDB.shutdown();
 		}
 		return retVal;
 	}
 
 	@Override
 	public int listFriends(int requesterID, int profileOwnerID, Set<String> fields, Vector<HashMap<String, ByteIterator>> result, boolean insertImage, boolean testMode) {
-		System.out.println("inside listFriends");
+		//System.out.println("inside listFriends");
+
 		int retVal = 0;
 
-		Graph graphDB = new Neo4jGraph("db/Blueprints/neo4jdb");
-		FramedGraphFactory factory = new FramedGraphFactory();
-		FramedGraph<Graph> manager = factory.create(graphDB);
+		if (requesterID < 0 || profileOwnerID < 0)
+			return -1;
 
-		User profileOwner = manager.getVertex(profileOwnerID, User.class);
 		try {
+			if (graphDB == null) {
+				graphDB = new Neo4jGraph(dbLocation);
+				factory = new FramedGraphFactory();
+				manager = factory.create(graphDB);
+			}
+
+			User profileOwner = manager.getVertex(profileOwnerID, User.class);
+
 			for (User friends : profileOwner.getFriends()) {
 				HashMap<String, ByteIterator> hm = new HashMap<>();
 
@@ -290,23 +303,27 @@ public class Blueprints extends DB {
 			System.out.println("listFriends : " + e.toString());
 			retVal = -1;
 		} finally {
-			graphDB.shutdown();
+			//			graphDB.shutdown();
 		}
 		return retVal;
 	}
 
 	@Override
 	public int viewFriendReq(int profileOwnerID, Vector<HashMap<String, ByteIterator>> results, boolean insertImage, boolean testMode) {
+		//System.out.println("inside viewFriendReq");
+
 		int retVal = 0;
 
 		if (profileOwnerID < 0)
 			return -1;
 
-		Graph graphDB = new Neo4jGraph("db/Blueprints/neo4jdb");
-		FramedGraphFactory factory = new FramedGraphFactory();
-		FramedGraph<Graph> manager = factory.create(graphDB);
-
 		try {
+			if (graphDB == null) {
+				graphDB = new Neo4jGraph(dbLocation);
+				factory = new FramedGraphFactory();
+				manager = factory.create(graphDB);
+			}
+
 			User profileOwner = (User) manager.frame(graphDB.getVertex(profileOwnerID), User.class);
 
 			// total friends and pending requests of a user
@@ -337,21 +354,27 @@ public class Blueprints extends DB {
 		}
 
 		finally {
-			graphDB.shutdown();
+			//			graphDB.shutdown();
 		}
 		return retVal;
 	}
 
 	@Override
 	public int acceptFriend(int inviterID, int inviteeID) {
+		//System.out.println("inside acceptFriend");
+
 		int retVal = 0;
+
 		if (inviterID < 0 || inviteeID < 0)
 			return -1;
-		System.out.println("inside acceptFriend");
-		Graph graphDB = new Neo4jGraph("db/Blueprints/neo4jdb");
-		FramedGraphFactory factory = new FramedGraphFactory();
-		FramedGraph<Graph> manager = factory.create(graphDB);
+
 		try {
+			if (graphDB == null) {
+				graphDB = new Neo4jGraph(dbLocation);
+				factory = new FramedGraphFactory();
+				manager = factory.create(graphDB);
+			}
+
 			User inviter = (User) manager.frame(graphDB.getVertex(inviterID), User.class);
 
 			User invitee = (User) manager.frame(graphDB.getVertex(inviteeID), User.class);
@@ -370,55 +393,59 @@ public class Blueprints extends DB {
 			System.out.println("acceptFriend : " + e.toString());
 			retVal = -1;
 		} finally {
-			graphDB.shutdown();
+			//			graphDB.shutdown();
 		}
 		return retVal;
 	}
 
 	@Override
 	public int rejectFriend(int inviterID, int inviteeID) {
+		//System.out.println("inside rejectFriend");
+
 		int retVal = 0;
+
 		if (inviterID < 0 || inviteeID < 0)
 			return -1;
 
-		Graph graphDB = new Neo4jGraph("db/Blueprints/neo4jdb");
-		FramedGraphFactory factory = new FramedGraphFactory();
-		FramedGraph<Graph> manager = factory.create(graphDB);
-
 		try {
+			if (graphDB == null) {
+				graphDB = new Neo4jGraph(dbLocation);
+				factory = new FramedGraphFactory();
+				manager = factory.create(graphDB);
+			}
+
 			User inviter = (User) manager.frame(graphDB.getVertex(inviterID), User.class);
 
 			User invitee = (User) manager.frame(graphDB.getVertex(inviteeID), User.class);
 
 			if (inviter != null && invitee != null) {
-				for (User userReq : invitee.getFriends()) {
-					// Check if the 2nd user has sent a friend request.
-					if (userReq.getUserID().equals(inviter.getUserID())) {
-						invitee.removeFriendRequests(inviter);
-						break;
-					}
-				}
+				invitee.removeFriendRequests(inviter);
 			}
 		} catch (Exception e) {
 			System.out.println("rejectFriend : " + e.toString());
 			retVal = -1;
 		} finally {
-			graphDB.shutdown();
+			//			graphDB.shutdown();
 		}
 		return retVal;
 	}
 
 	@Override
 	public int inviteFriend(int inviterID, int inviteeID) {
+		//System.out.println("inside inviteFriend");
+
 		int retVal = 0;
+
 		if (inviterID < 0 || inviteeID < 0)
 			return -1;
 
-		Graph graphDB = new Neo4jGraph("db/Blueprints/neo4jdb");
-		FramedGraphFactory factory = new FramedGraphFactory();
-		FramedGraph<Graph> manager = factory.create(graphDB);
-		//System.out.println("inside inviteFriend");
 		try {
+			if (graphDB == null) {
+				graphDB = new Neo4jGraph(dbLocation);
+				factory = new FramedGraphFactory();
+				manager = factory.create(graphDB);
+			}
+
 			User inviter = (User) manager.frame(graphDB.getVertex(inviterID), User.class);
 
 			User invitee = (User) manager.frame(graphDB.getVertex(inviteeID), User.class);
@@ -437,51 +464,64 @@ public class Blueprints extends DB {
 
 	@Override
 	public int viewTopKResources(int requesterID, int profileOwnerID, int k, Vector<HashMap<String, ByteIterator>> result) {
+		//System.out.println("inside viewTopKResources");
+
 		if (requesterID < 0 || profileOwnerID < 0 || k < 0)
 			return -1;
+
 		int resCount = 0;
 		int retVal = 0;
 
-		Graph graphDB = new Neo4jGraph("db/Blueprints/neo4jdb");
-		FramedGraphFactory factory = new FramedGraphFactory();
-		FramedGraph<Graph> manager = factory.create(graphDB);
-
 		try {
+			if (graphDB == null) {
+				graphDB = new Neo4jGraph(dbLocation);
+				factory = new FramedGraphFactory();
+				manager = factory.create(graphDB);
+			}
+
 			User profileOwner = (User) manager.frame(graphDB.getVertex(profileOwnerID), User.class);
 
-			for (Resource resource : profileOwner.getResources()) {
-				resCount++;
-				if (resCount > k)
-					break;
+			if (profileOwner != null) {
+				for (Resource resource : profileOwner.getResources()) {
+					resCount++;
+					if (resCount > k)
+						break;
 
-				HashMap<String, ByteIterator> values = new HashMap<String, ByteIterator>();
+					HashMap<String, ByteIterator> values = new HashMap<String, ByteIterator>();
 
-				values.put("creatorid", new StringByteIterator(resource.getCreatorId()));
-				values.put("walluserid", new StringByteIterator(resource.getWallUserId()));
-				values.put("type", new StringByteIterator(resource.getType()));
-				values.put("body", new StringByteIterator(resource.getBody()));
-				values.put("doc", new StringByteIterator(resource.getDoc()));
+					values.put("creatorid", new StringByteIterator(resource.getCreatorId()));
+					values.put("walluserid", new StringByteIterator(resource.getWallUserId()));
+					values.put("type", new StringByteIterator(resource.getType()));
+					values.put("body", new StringByteIterator(resource.getBody()));
+					values.put("doc", new StringByteIterator(resource.getDoc()));
 
-				result.add(values);
+					result.add(values);
+				}
+			} else {
+				retVal = -1;
 			}
 		} catch (Exception e) {
 			System.out.println("viewTopKResources : " + e.toString());
 			retVal = -1;
 		} finally {
-			graphDB.shutdown();
+			//graphDB.shutdown();
 		}
 		return retVal;
 	}
 
 	@Override
 	public int getCreatedResources(int creatorID, Vector<HashMap<String, ByteIterator>> result) {
+		//System.out.println("inside getCreatedResources");
+
 		int retVal = 0;
 
-		Graph graphDB = new Neo4jGraph("db/Blueprints/neo4jdb");
-		FramedGraphFactory factory = new FramedGraphFactory();
-		FramedGraph<Graph> manager = factory.create(graphDB);
-
 		try {
+			if (graphDB == null) {
+				graphDB = new Neo4jGraph(dbLocation);
+				factory = new FramedGraphFactory();
+				manager = factory.create(graphDB);
+			}
+
 			User member = (User) manager.frame(graphDB.getVertex(creatorID), User.class);
 
 			for (Resource resource : member.getResources()) {
@@ -500,22 +540,26 @@ public class Blueprints extends DB {
 			System.out.println("acceptFriend : " + e.toString());
 			retVal = -1;
 		} finally {
-			graphDB.shutdown();
+			//			graphDB.shutdown();
 		}
 		return retVal;
 	}
 
 	@Override
 	public int viewCommentOnResource(int requesterID, int profileOwnerID, int resourceID, Vector<HashMap<String, ByteIterator>> result) {
+		//System.out.println("inside viewCommentOnResource");
 
 		if (profileOwnerID < 0 || requesterID < 0 || resourceID < 0)
 			return -1;
 
-		Graph graphDB = new Neo4jGraph("db/Blueprints/neo4jdb");
-		FramedGraphFactory factory = new FramedGraphFactory();
-		FramedGraph<Graph> manager = factory.create(graphDB);
-
+		resourceID += maxUsers;
 		try {
+			if (graphDB == null) {
+				graphDB = new Neo4jGraph(dbLocation);
+				factory = new FramedGraphFactory();
+				manager = factory.create(graphDB);
+			}
+
 			Resource resource = (Resource) manager.frame(graphDB.getVertex(resourceID), Resource.class);
 			Iterator<Manipulation> itr = resource.getManipulations().iterator();
 
@@ -535,19 +579,23 @@ public class Blueprints extends DB {
 			System.out.println("viewCommentOnResource :" + ex.getMessage());
 			return -1;
 		} finally {
-			graphDB.shutdown();
+			//			graphDB.shutdown();
 		}
 		return 0;
 	}
 
 	@Override
 	public int postCommentOnResource(int commentCreatorID, int resourceCreatorID, int resourceID, HashMap<String, ByteIterator> values) {
+		//System.out.println("inside postCommentOnResource");
 
-		Graph graphDB = new Neo4jGraph("db/Blueprints/neo4jdb");
-		FramedGraphFactory factory = new FramedGraphFactory();
-		FramedGraph<Graph> manager = factory.create(graphDB);
-
+		resourceID += maxUsers;
 		try {
+			if (graphDB == null) {
+				graphDB = new Neo4jGraph(dbLocation);
+				factory = new FramedGraphFactory();
+				manager = factory.create(graphDB);
+			}
+
 			User commentCreator = (User) manager.frame(graphDB.getVertex(commentCreatorID), User.class);
 			Resource resource = (Resource) manager.frame(graphDB.getVertex(resourceID), Resource.class);
 
@@ -588,47 +636,55 @@ public class Blueprints extends DB {
 			System.out.println("postCommentOnResource :" + ex.getMessage());
 			return -1;
 		} finally {
-			graphDB.shutdown();
+			//			graphDB.shutdown();
 		}
 		return 0;
 	}
 
 	@Override
 	public int delCommentOnResource(int resourceCreatorID, int resourceID, int manipulationID) {
+		//System.out.println("inside delCommentOnResource");
 
 		if (resourceCreatorID < 0 || manipulationID < 0 || resourceID < 0)
 			return -1;
 
-		Graph graphDB = new Neo4jGraph("db/Blueprints/neo4jdb");
-		FramedGraphFactory factory = new FramedGraphFactory();
-		FramedGraph<Graph> manager = factory.create(graphDB);
-
-		Manipulation manipulation = (Manipulation) manager.frame(graphDB.getVertex(manipulationID), Manipulation.class);
-		Resource resource = (Resource) manager.frame(graphDB.getVertex(resourceID), Resource.class);
-
+		resourceID += maxUsers;
 		try {
-			resource.removeManipulation(manipulation);
+			if (graphDB == null) {
+				graphDB = new Neo4jGraph(dbLocation);
+				factory = new FramedGraphFactory();
+				manager = factory.create(graphDB);
+			}
 
+			Manipulation manipulation = (Manipulation) manager.frame(graphDB.getVertex(manipulationID), Manipulation.class);
+			Resource resource = (Resource) manager.frame(graphDB.getVertex(resourceID), Resource.class);
+
+			resource.removeManipulation(manipulation);
 		} catch (Exception ex) {
 			System.out.println("delCommentOnResource :" + ex.getMessage());
 			return -1;
 		} finally {
-			graphDB.shutdown();
+			//			graphDB.shutdown();
 		}
 		return 0;
 	}
 
 	@Override
 	public int thawFriendship(int friendid1, int friendid2) {
+		//System.out.println("inside thawFriendship");
+
 		int retVal = 0;
+
 		if (friendid1 < 0 || friendid2 < 0)
 			return -1;
 
-		Graph graphDB = new Neo4jGraph("db/Blueprints/neo4jdb");
-		FramedGraphFactory factory = new FramedGraphFactory();
-		FramedGraph<Graph> manager = factory.create(graphDB);
-
 		try {
+			if (graphDB == null) {
+				graphDB = new Neo4jGraph(dbLocation);
+				factory = new FramedGraphFactory();
+				manager = factory.create(graphDB);
+			}
+
 			User inviter = (User) manager.frame(graphDB.getVertex(friendid1), User.class);
 
 			User invitee = (User) manager.frame(graphDB.getVertex(friendid2), User.class);
@@ -647,22 +703,25 @@ public class Blueprints extends DB {
 			System.out.println("thawFriendship : " + e.toString());
 			retVal = -1;
 		} finally {
-			graphDB.shutdown();
+			//			graphDB.shutdown();
 		}
 		return retVal;
 	}
 
 	@Override
 	public HashMap<String, String> getInitialStats() {
-
-		System.out.println("inside getInitialStats");
-		Graph graphDB = new Neo4jGraph("db/Blueprints/neo4jdb");
+		//System.out.println("inside getInitialStats");
 
 		HashMap<String, String> stats = new HashMap<String, String>();
 		double usercnt = 0, frndCount = 0, pendCount = 0, resCount = 0;
 		double totalFriendsForAll = 0, totalFriendsPendingForAll = 0;
 
 		try {
+			if (graphDB == null) {
+				graphDB = new Neo4jGraph(dbLocation);
+				factory = new FramedGraphFactory();
+				manager = factory.create(graphDB);
+			}
 
 			// Total number of users
 			Iterable<Vertex> allVertices = graphDB.getVertices();
@@ -671,7 +730,7 @@ public class Blueprints extends DB {
 					if (s.equals("userid")) {
 						usercnt++;
 
-						User node = (User) vertex;
+						User node = (User) manager.frame(graphDB.getVertex(vertex.getProperty("userid")), User.class);
 
 						// total friends and pending requests of a user
 						frndCount = 0;
@@ -687,11 +746,11 @@ public class Blueprints extends DB {
 						}
 						totalFriendsForAll += frndCount;
 						totalFriendsPendingForAll += frndCount;
-					}
 
-					// break is outside the if cos the first property identifies
-					// the node type : user or resource
-					break;
+						// break is outside the if cos the first property identifies
+						// the node type : user or resource
+						break;
+					}
 				}
 			}
 
@@ -702,7 +761,7 @@ public class Blueprints extends DB {
 		} catch (Exception e) {
 			System.out.println("getInitialStats : " + e.toString());
 		} finally {
-			graphDB.shutdown();
+			//			graphDB.shutdown();
 		}
 		stats.put("usercount", Double.toString(usercnt));
 		stats.put("avgfriendsperuser", Double.toString(frndCount));
@@ -725,48 +784,66 @@ public class Blueprints extends DB {
 
 	@Override
 	public int queryPendingFriendshipIds(int memberID, Vector<Integer> pendingIds) {
+		//System.out.println("inside queryPendingFriendshipIds");
+
 		int retVal = 0;
 
-		Graph graphDB = new Neo4jGraph("db/Blueprints/neo4jdb");
-		FramedGraphFactory factory = new FramedGraphFactory();
-		FramedGraph<Graph> manager = factory.create(graphDB);
-
 		try {
+			if (graphDB == null) {
+				graphDB = new Neo4jGraph(dbLocation);
+				factory = new FramedGraphFactory();
+				manager = factory.create(graphDB);
+			}
+
 			User member = (User) manager.frame(graphDB.getVertex(memberID), User.class);
 
 			for (User friend : member.getFriendRequests()) {
 				pendingIds.add(Integer.parseInt(friend.getUserID()));
 			}
 		} catch (Exception e) {
-			System.out.println("acceptFriend : " + e.toString());
+			System.out.println("queryPendingFriendshipIds : " + e.toString());
 			retVal = -1;
 		} finally {
-			graphDB.shutdown();
+			//			graphDB.shutdown();
 		}
 		return retVal;
 	}
 
 	@Override
 	public int queryConfirmedFriendshipIds(int memberID, Vector<Integer> confirmedIds) {
+		//System.out.println("inside queryConfirmedFriendshipIds");
+
 		int retVal = 0;
 
-		Graph graphDB = new Neo4jGraph("db/Blueprints/neo4jdb");
-		FramedGraphFactory factory = new FramedGraphFactory();
-		FramedGraph<Graph> manager = factory.create(graphDB);
-
 		try {
+			if (graphDB == null) {
+				graphDB = new Neo4jGraph(dbLocation);
+				factory = new FramedGraphFactory();
+				manager = factory.create(graphDB);
+			}
+
 			User member = (User) manager.frame(graphDB.getVertex(memberID), User.class);
 
 			for (User friend : member.getFriends()) {
 				confirmedIds.add(Integer.parseInt(friend.getUserID()));
 			}
 		} catch (Exception e) {
-			System.out.println("acceptFriend : " + e.toString());
+			System.out.println("queryConfirmedFriendshipIds : " + e.toString());
 			retVal = -1;
 		} finally {
-			graphDB.shutdown();
+			//			graphDB.shutdown();
 		}
 		return retVal;
 	}
+
 	// END SNIPPET: implement abstract functions
+
+	private static void registerShutdownHook(final Graph graphDB2) {
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			@Override
+			public void run() {
+				graphDB2.shutdown();
+			}
+		});
+	}
 }
